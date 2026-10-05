@@ -136,8 +136,8 @@ Se propone usar `NavigationStack` con `NavigationLink` y `navigationDestination`
 
 | Desde | Hacia | Acción | Mecanismo |
 |---|---|---|---|
-| Inicio | Detalle | Toca un libro | `navigationDestination` |
-| Detalle | Inicio | Botón *back* | Automático con `NavigationStack` |
+| Inicio | Detalle | Toca un libro | `navigationStack` |
+| Detalle | Inicio | Botón *back* | Automático con `NavigationLink` |
 | Inicio | Favoritos | Botón de Favoritos | `NavigationLink` |
 | Favoritos | Detalle | Toca un libro | El mismo `navigationDestination` |
 | Detalle | Detalle | Guardar | El botón modifica el dato del `BookStore` |
