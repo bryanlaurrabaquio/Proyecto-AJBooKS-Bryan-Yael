@@ -5,13 +5,13 @@
 · Yael Alam González Prospero 
 · Bryan Ricardo Laurrabaquio Ramirez
 
----
+----------------------------------------------------------------------------------------------------------
 
 ## 1. ¿Por qué conviene separar responsabilidades?
 
-Como no sabemos si le vamos a agregar mas pantallas o lógica a AJBooks (tiene solo tres pantallas), cada pantalla nueva agrega más reglas: filtros, mensajes, estados, si todo vive dentro de las vistas, cada cambio obliga a leer y tocar mucho código mezclado y el separar responsabilidades significa que cada parte del código va a tener **un solo trabajo**, esto hace que cada pantalla de la app pueda leer, cambiar y probar sin afectar a las demás.
+Como no sabemos si le vamos a agregar mas pantallas o lógica a AJBooks (tiene solo tres pantallas), cada pantalla nueva agrega más reglas: filtros, mensajes, estados, si todo vive dentro de las vistas, cada cambio obliga a leer y tocar mucho código mezclado y el separar responsabilidades significa que cada parte del código va a tener un solo trabajo, esto hace que cada pantalla de la app pueda leer, cambiar y probar sin afectar a las demás.
 
-Las vistas de la app de AJBooks hacen dos trabajos a la vez: **dibujar la interfaz** y **decidir qué datos mostrar**, por ejemplo, `ContentView` filtra los libros y decide cuándo mostrar el mensaje de "no se encontraron libros", y `SecondView` decide el texto del botón según el estado de "guardado".
+Las vistas de la app de AJBooks hacen dos trabajos a la vez: dibujar la interfaz y decidir qué datos mostrar, por ejemplo, `ContentView` filtra los libros y decide cuándo mostrar el mensaje de "no se encontraron libros", y `SecondView` decide el texto del botón según el estado de "guardado".
 
 ### 1.1 Diferencia entre código de interfaz, de datos y de lógica
 
@@ -21,7 +21,7 @@ Las vistas de la app de AJBooks hacen dos trabajos a la vez: **dibujar la interf
 | **Datos** | La información de la app y su forma | `struct Book`, la lista `books`, `favoriteIDs` |
 | **Lógica** | Las decisiones y reglas que se aplican sobre los datos | Filtrar libros por búsqueda, alternar un favorito, decidir qué mensaje mostrar, armar el texto `año - género` |
 
-La interfaz **muestra**, los datos **describen** y la lógica **decide**. El problema aparece cuando las tres cosas están en el mismo archivo.
+La interfaz muestra, los datos describen y la lógica decide. El problema aparece cuando las tres cosas están en el mismo archivo.
 
 ### 1.2 Problemas cuando una View concentra demasiadas responsabilidades
 
@@ -53,7 +53,7 @@ flowchart LR
     V -->|"se actualiza sola (Observation)"| U
 ```
 
-La vista **observa** al ViewModel; cuando cambia su estado, SwiftUI vuelve a dibujar, la vista nunca habla directamente con el Model.
+La vista observa al ViewModel; cuando cambia su estado, SwiftUI vuelve a dibujar, la vista nunca habla directamente con el Model.
 
 En el patrón MVVM, el ViewModel se encarga de la lógica de presentación y de pasar a la vista los datos del Model ya preparados. Con la macro `@Observable`, SwiftUI actualiza las vistas que leen esos datos cuando cambian.
 
@@ -74,7 +74,7 @@ Hoy todos los archivos están juntos en la misma carpeta del proyecto. No se han
 
 ### Lógica que debería salir de las vistas
 
-El criterio que usamos es este: si algo es **una decisión o una regla sobre los datos**, debe salir de la vista; si solo describe **cómo se dibuja** algo en pantalla, se queda en la vista.
+El criterio que usamos es este: si algo es una decisión o una regla sobre los datos, debe salir de la vista y si solo describe cómo se dibuja algo en pantalla, se queda en la vista.
 
 | Lógica | Dónde está hoy | A dónde debería ir | Por qué debería salir |
 |---|---|---|---|
@@ -86,11 +86,11 @@ El criterio que usamos es este: si algo es **una decisión o una regla sobre los
 | Decidir el texto del botón (“Guardar” / “Guardado”) y su etiqueta de VoiceOver | `SecondView` | ViewModel de Detalle | El texto depende del estado de “guardado”, es decir, es lógica de presentación, que es justo el trabajo del ViewModel. |
 | Mensaje de “aún no hay favoritos” | `FavoritesView` | ViewModel de Favoritos | Depende de si la lista está vacía, el ViewModel puede exponer `isEmpty` y la vista solo decide cómo mostrarlo. |
 
-**Lo que se queda en la vista:** layout (`VStack`, `HStack`, `frame`), colores, modifiers, `NavigationLink`/`navigationDestination` y el `@State` de interfaz puro.
+Lo que se queda en la vista: layout (`VStack`, `HStack`, `frame`), colores, modifiers, `NavigationLink`/`navigationDestination` y el `@State` de interfaz puro.
 
 **Por qué se queda en la vista:**
 
-- **Layout, colores y modifiers:** son la parte de **interfaz**, es decir, cómo se ve la pantalla. No toman decisiones sobre los datos, así que no hay nada que separar.
+- **Layout, colores y modifiers:** son la parte de interfaz, es decir, cómo se ve la pantalla. No toman decisiones sobre los datos, así que no hay nada que separar.
 - **`NavigationLink` y `navigationDestination`:** conectan una pantalla con otra y el destino es una vista, por eso pertenecen a la capa de interfaz.
 - **`@State` de interfaz puro:** es estado que solo afecta cómo se ve una pantalla y que ninguna otra parte de la app necesita. No es un dato de la app, por lo que no hace falta llevarlo al ViewModel.
 
@@ -108,7 +108,7 @@ El criterio que usamos es este: si algo es **una decisión o una regla sobre los
 
 ### Estructura de carpetas
 
-Esta estructura es **propuesta para la siguiente etapa**; todavía no existe en el proyecto.
+Esta estructura es la propuesta de la arquitectura para la siguiente etapa:
 
 ```
 Proyecto Bry y Yael/
@@ -136,7 +136,7 @@ Proyecto Bry y Yael/
 
 ### Qué pasa con `BookStore`
 
-`BookStore` **se mantiene** como la **fuente única de verdad** (Single Source of Truth), los tres ViewModels reciben el mismo `BookStore` y leen/modifican datos a través de él, así se evita que cada ViewModel tenga su propia copia de los favoritos y se desincronicen. La documentación de Apple indica que un objeto de datos observable puede crearse una sola vez en la `App` de nivel superior para usarlo en toda la aplicación, que es justo lo que hace hoy el proyecto.
+`BookStore` se mantiene como la fuente única de verdad (Single Source of Truth), los tres ViewModels reciben el mismo `BookStore` y leen/modifican datos a través de él, así se evita que cada ViewModel tenga su propia copia de los favoritos y se desincronicen. La documentación de Apple indica que un objeto de datos observable puede crearse una sola vez en la `App` de nivel superior para usarlo en toda la aplicación, que es justo lo que hace hoy el proyecto.
 
 
 ## 5. Dudas y cosas por resolver antes de implementar
