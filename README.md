@@ -36,3 +36,35 @@ Además del flujo feliz, la app contempla:
 	•	Mis libros vacío — cuando aún no se ha guardado ningún libro, con acceso directo a Buscar.
 Datos del detalle
 Cada libro muestra título, autor(es), año de publicación, descripción, idioma y número de ediciones cuando Open Library los provee. Si algún dato no está disponible (portada, año, descripción), se muestra un estado de reemplazo en vez de dejar el espacio vacío o romper el diseño.
+
+### Road Map:
+
+## Plan de implementación
+
+Lo que se haría en la siguiente etapa, ordenado por tema visto en clase.
+
+### Estado
+
+- Crear el `BookStore` con `@Observable`, con la lista de libros y los favoritos
+- Inyectarlo en la raíz de la app con `@Environment`
+- Quitar `@State var saved` de `SecondView` y usar el dato del `BookStore`
+- Mantener `searchText` como `@State` en `ContentView`
+
+### Navegación
+
+- Cambiar `NavigationView` por `NavigationStack`
+- Usar `NavigationLink` y `navigationDestination` para ir al detalle
+- Crear `FavoritesView` y agregar el acceso desde Inicio
+
+### Componentes
+
+- Mover `Book` a su propio archivo
+- Extraer la fila del libro (`BookRow`) como subvista, porque el mismo diseño se repite
+
+### Interfaz adaptativa y accesibilidad
+
+- Revisar los tamaños fijos de las portadas (`frame` de 60×80 y 120×170) para que se adapten
+- Probar con Dynamic Type
+- Agregar labels descriptivos para VoiceOver (portada y botón Guardar)
+- No depender solo del color: año y género van solo en rojo y en letra pequeña
+- Mostrar un mensaje cuando la búsqueda no tenga resultados y cuando no haya favoritos
