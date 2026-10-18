@@ -10,3 +10,11 @@ struct Book: Identifiable, Hashable {
     var genre: String
     var description: String
 }
+
+// Dato calculado del Model: el formato "año - género" se arma en un solo lugar,
+// así todas las pantallas muestran el mismo texto.
+extension Book {
+    var subtitle: String {
+        return year + " - " + genre
+    }
+}
