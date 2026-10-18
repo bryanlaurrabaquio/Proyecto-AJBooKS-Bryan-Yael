@@ -22,8 +22,18 @@ let books = [
 ]
 
 struct ContentView: View {
-    @State var searchText = ""
+    // Objeto compartido que se inyecta en Proyecto_Bry_y_YaelApp.
+    @Environment(BookStore.self) private var store
 
+    // ViewModel de esta pantalla: la vista lo crea y es su dueña (@State).
+    // Como ContentView es la raíz del NavigationStack, no se destruye al abrir
+    // el detalle y el texto de búsqueda se conserva al regresar.
+    @State private var viewModel = BookListViewModel()
+
+    // La vista solo pide la lista ya filtrada; la lógica vive en el ViewModel.
+    private var filteredBooks: [Book] {
+        viewModel.filteredBooks(from: store.books)
+    }
     var body: some View {
     NavigationView {
     VStack(alignment: .leading, spacing: 12) {
@@ -35,47 +45,27 @@ struct ContentView: View {
     Text("Libros en tendencia")
     .foregroundColor(.gray)
 
-    TextField("Buscar libro", text: $searchText)
-    .padding(10)
-    .background(Color.gray.opacity(0.2))
-    .cornerRadius(8)
+                TextField("Buscar libro", text: $viewModel.searchText)
+                    .padding(10)
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(8)
 
-    ScrollView {
-    VStack(spacing: 10) {
-    ForEach(books) { book in
-    if searchText == "" || book.title.lowercased().contains(searchText.lowercased()) {
-    NavigationLink(destination: SecondView(book: book)) {
-    HStack {
-    Image(systemName: "book.closed")
-    .font(.largeTitle)
-    .frame(width: 60, height: 80)
-    .background(Color.gray.opacity(0.3))
-    .cornerRadius(6)
-
-    VStack(alignment: .leading, spacing: 5) {
-    Text(book.title)
-    .font(.headline)
-    .foregroundColor(.white)
-
-     Text(book.author)
-    .foregroundColor(.gray)
-
-     Text(book.year + " - " + book.genre)
-     .font(.caption)
-    .foregroundColor(.red)
-     }
-
-    Spacer()
-    }
-    .padding(10)
-    .background(Color.gray.opacity(0.15))
-    .cornerRadius(10)
-    }
-        }
-            }
-                }
-                    }
+                if filteredBooks.isEmpty {
+                    // Estado vacío: la búsqueda no encontró libros.
+                    ContentUnavailableView.search(text: viewModel.trimmedSearchText)
+                } else {
+                    ScrollView {
+                        VStack(spacing: 10) {
+                            ForEach(filteredBooks) { book in
+                                // Solo se envía el libro; el destino se define abajo.
+                                NavigationLink(value: book) {
+                                    BookRow(book: book, isFavorite: store.isFavorite(book))
+                                }
+                            }
                         }
+                    }
+                }
+            }
             .padding()
         }
         .preferredColorScheme(.dark)
