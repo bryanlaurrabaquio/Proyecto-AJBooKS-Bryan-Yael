@@ -1,14 +1,9 @@
 import SwiftUI
 
-// Pantalla 2: Detalle del libro
+// Pantalla 2: Detalle del libro.
+// La vista solo muestra y avisa del toque; el estado "guardado" lo maneja BookDetailViewModel.
 struct SecondView: View {
-    @Environment(BookStore.self) var store
-    var book: Book
-
-    // El estado de favorito se lee del BookStore, no de un @State local.
-    var saved: Bool {
-        return store.isFavorite(book)
-    }
+    var viewModel: BookDetailViewModel
 
     var body: some View {
         ScrollView {
@@ -19,42 +14,42 @@ struct SecondView: View {
                         .frame(width: 120, height: 170)
                         .background(Color.gray.opacity(0.3))
                         .cornerRadius(10)
-                        .accessibilityLabel("Portada de " + book.title)
+                        .accessibilityLabel("Portada de " + viewModel.book.title)
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(book.title)
+                        Text(viewModel.book.title)
                             .font(.title2)
                             .bold()
 
-                        Text(book.author)
+                        Text(viewModel.book.author)
                             .foregroundColor(.gray)
                     }
                 }
 
                 Button(action: {
-                    store.toggleFavorite(book)
+                    viewModel.toggleSaved()
                 }) {
                     HStack {
-                        Image(systemName: saved ? "heart.fill" : "heart")
-                        Text(saved ? "Guardado" : "Guardar")
+                        Image(systemName: viewModel.isSaved ? "heart.fill" : "heart")
+                        Text(viewModel.buttonTitle)
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(saved ? Color.red : Color.gray)
+                    .background(viewModel.isSaved ? Color.red : Color.gray)
                     .foregroundColor(.white)
                     .cornerRadius(8)
                 }
-                .accessibilityLabel(saved ? "Quitar de favoritos" : "Guardar en favoritos")
+                .accessibilityLabel(viewModel.buttonAccessibilityLabel)
 
                 Text("Descripción")
                     .font(.headline)
 
-                Text(book.description)
+                Text(viewModel.book.description)
                     .foregroundColor(.gray)
 
-                Text("Autor: " + book.author)
-                Text("Año: " + book.year)
-                Text("Género: " + book.genre)
+                Text("Autor: " + viewModel.book.author)
+                Text("Año: " + viewModel.book.year)
+                Text("Género: " + viewModel.book.genre)
             }
             .padding()
         }
@@ -63,9 +58,9 @@ struct SecondView: View {
 }
 
 #Preview {
+    let store = BookStore()
     NavigationStack {
-        SecondView(book: BookStore().books[0])
+        SecondView(viewModel: BookDetailViewModel(book: store.books[0], store: store))
     }
-    .environment(BookStore())
     .preferredColorScheme(.dark)
 }
