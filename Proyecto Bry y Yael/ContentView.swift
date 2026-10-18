@@ -1,63 +1,46 @@
 import SwiftUI
 
-struct Book: Identifiable {
-    var id = UUID()
-    var title: String
-    
-    
-    
-    var author: String
-    var year: String
-    var genre: String
-    var description: String
-}
-
-let books = [
-    Book(title: "La Odisea", author: "Homero", year: "Desconocido", genre: "Aventura", description: "Tras la guerra de Troya, Odiseo emprende un largo viaje de regreso a su hogar en Ítaca."),
-    Book(title: "El principito", author: "Antoine de Saint-Exupéry", year: "1943", genre: "Fantasía", description: "Un piloto perdido en el desierto conoce a un pequeño príncipe que viene de otro planeta."),
-    Book(title: "Cien años de soledad", author: "Gabriel García Márquez", year: "1967", genre: "Realismo mágico", description: "La historia de varias generaciones de la familia Buendía en el pueblo de Macondo."),
-    Book(title: "Pedro Páramo", author: "Juan Rulfo", year: "1955", genre: "Realismo mágico", description: "Juan Preciado llega a Comala buscando a su padre y encuentra un pueblo lleno de murmullos."),
-    Book(title: "Don Quijote de la Mancha", author: "Miguel de Cervantes", year: "1605", genre: "Clásico", description: "Un hidalgo sale a buscar aventuras como caballero andante junto a Sancho Panza."),
-    Book(title: "Frankenstein", author: "Mary Shelley", year: "1818", genre: "Terror", description: "Un científico da vida a una criatura y tiene que enfrentar las consecuencias.")
-]
-
+// Inicio conserva la búsqueda en su ViewModel y comparte el catálogo y favoritos.
 struct ContentView: View {
-    // Objeto compartido que se inyecta en Proyecto_Bry_y_YaelApp.
     @Environment(BookStore.self) private var store
-
-    // ViewModel de esta pantalla: la vista lo crea y es su dueña (@State).
-    // Como ContentView es la raíz del NavigationStack, no se destruye al abrir
-    // el detalle y el texto de búsqueda se conserva al regresar.
     @State private var viewModel = BookListViewModel()
 
-    // La vista solo pide la lista ya filtrada; la lógica vive en el ViewModel.
     private var filteredBooks: [Book] {
         viewModel.filteredBooks(from: store.books)
     }
+
     var body: some View {
-    NavigationView {
-    VStack(alignment: .leading, spacing: 12) {
-    Text("AJBooks")
-    .font(.largeTitle)
-    .bold()
-    .foregroundColor(.red)
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("AJBooks")
+                        .font(.largeTitle)
+                        .bold()
+                        .foregroundColor(.red)
 
-    Text("Libros en tendencia")
-    .foregroundColor(.gray)
+                    Spacer()
 
-                TextField("Buscar libro", text: $viewModel.searchText)
-                    .padding(10)
-                    .background(Color.gray.opacity(0.2))
-                    .cornerRadius(8)
+                    NavigationLink(destination: FavoritesView()) {
+                        HStack {
+                            Image(systemName: "heart.fill")
+                            Text(String(store.favoriteBooks.count))
+                        }
+                        .foregroundColor(.red)
+                    }
+                    .accessibilityLabel("Ver favoritos")
+                }
+
+                Text("Libros en tendencia")
+                    .foregroundColor(.gray)
+
+                SearchField(text: $viewModel.searchText)
 
                 if filteredBooks.isEmpty {
-                    // Estado vacío: la búsqueda no encontró libros.
                     ContentUnavailableView.search(text: viewModel.trimmedSearchText)
                 } else {
                     ScrollView {
                         VStack(spacing: 10) {
                             ForEach(filteredBooks) { book in
-                                // Solo se envía el libro; el destino se define abajo.
                                 NavigationLink(value: book) {
                                     BookRow(book: book, isFavorite: store.isFavorite(book))
                                 }
@@ -67,11 +50,15 @@ struct ContentView: View {
                 }
             }
             .padding()
+            .navigationDestination(for: Book.self) { book in
+                SecondView(book: book)
+            }
         }
-        .preferredColorScheme(.dark)
     }
 }
 
 #Preview {
     ContentView()
+        .environment(BookStore())
+        .preferredColorScheme(.dark)
 }
