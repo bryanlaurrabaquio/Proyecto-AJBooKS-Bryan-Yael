@@ -21,7 +21,8 @@ struct BookRow: View {
                 Text(book.author)
                     .foregroundColor(.gray)
 
-                Text(book.year + " - " + book.genre)
+                // El formato "año - género" viene del Model (Book.subtitle).
+                Text(book.subtitle)
                     .font(.caption)
                     .foregroundColor(.red)
             }
