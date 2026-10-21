@@ -1,23 +1,23 @@
 import SwiftUI
 
-// Pantalla 1: Inicio (lista de libros con búsqueda)
+// Pantalla 1: Inicio (lista de libros con búsqueda).
+// La vista solo dibuja y avisa de las acciones; las reglas viven en BookListViewModel.
 struct ContentView: View {
-    @Environment(BookStore.self) var store
+    // El ViewModel se crea una sola vez con el BookStore que llega desde la App.
+    @State var viewModel: BookListViewModel
 
-    // Estado local: el texto de búsqueda solo importa en esta pantalla.
-    @State var searchText = ""
+    // Se guarda para pasárselo a los ViewModels de las pantallas a las que se navega.
+    let store: BookStore
 
-    // Libros que coinciden con la búsqueda (early return).
-    var filteredBooks: [Book] {
-        if searchText == "" {
-            return store.books
-        }
-        return store.books.filter { book in
-            book.title.lowercased().contains(searchText.lowercased())
-        }
+    init(store: BookStore) {
+        self.store = store
+        _viewModel = State(initialValue: BookListViewModel(store: store))
     }
 
     var body: some View {
+        // @Bindable permite enlazar searchText del ViewModel con el campo de texto.
+        @Bindable var viewModel = viewModel
+
         NavigationStack {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
@@ -28,11 +28,11 @@ struct ContentView: View {
 
                     Spacer()
 
-                    // Acceso a Favoritos, con el contador que viene del BookStore.
-                    NavigationLink(destination: FavoritesView()) {
+                    // Acceso a Favoritos, con el contador que prepara el ViewModel.
+                    NavigationLink(destination: FavoritesView(viewModel: FavoritesViewModel(store: store))) {
                         HStack {
                             Image(systemName: "heart.fill")
-                            Text(String(store.favorites.count))
+                            Text(String(viewModel.favoritesCount))
                         }
                         .foregroundColor(.red)
                     }
@@ -43,17 +43,17 @@ struct ContentView: View {
                     .foregroundColor(.gray)
 
                 // La subvista recibe el texto con @Binding (no tiene copia propia).
-                SearchField(text: $searchText)
+                SearchField(text: $viewModel.searchText)
 
-                if filteredBooks.isEmpty {
-                    Text("No se encontraron libros para " + searchText)
+                if viewModel.noResults {
+                    Text("No se encontraron libros para " + viewModel.searchText)
                         .foregroundColor(.gray)
                         .padding(.top)
                 }
 
                 ScrollView {
                     VStack(spacing: 10) {
-                        ForEach(filteredBooks) { book in
+                        ForEach(viewModel.filteredBooks) { book in
                             // Navegación basada en datos: se envía el libro elegido.
                             NavigationLink(value: book) {
                                 BookRow(book: book)
@@ -64,14 +64,13 @@ struct ContentView: View {
             }
             .padding()
             .navigationDestination(for: Book.self) { book in
-                SecondView(book: book)
+                SecondView(viewModel: BookDetailViewModel(book: book, store: store))
             }
         }
     }
 }
 
 #Preview {
-    ContentView()
-        .environment(BookStore())
+    ContentView(store: BookStore())
         .preferredColorScheme(.dark)
 }

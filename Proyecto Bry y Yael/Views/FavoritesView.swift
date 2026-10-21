@@ -1,19 +1,20 @@
 import SwiftUI
 
-// Pantalla 3: Favoritos
+// Pantalla 3: Favoritos.
+// La lista y el "está vacía" los prepara FavoritesViewModel.
 struct FavoritesView: View {
-    @Environment(BookStore.self) var store
+    var viewModel: FavoritesViewModel
 
     var body: some View {
         ScrollView {
             VStack(spacing: 10) {
-                if store.favorites.isEmpty {
+                if viewModel.isEmpty {
                     Text("Aún no tienes libros favoritos")
                         .foregroundColor(.gray)
                         .padding(.top, 40)
                 }
 
-                ForEach(store.favorites) { book in
+                ForEach(viewModel.favorites) { book in
                     // Reutiliza el mismo navigationDestination definido en Inicio.
                     NavigationLink(value: book) {
                         BookRow(book: book)
@@ -28,8 +29,7 @@ struct FavoritesView: View {
 
 #Preview {
     NavigationStack {
-        FavoritesView()
+        FavoritesView(viewModel: FavoritesViewModel(store: BookStore()))
     }
-    .environment(BookStore())
     .preferredColorScheme(.dark)
 }
