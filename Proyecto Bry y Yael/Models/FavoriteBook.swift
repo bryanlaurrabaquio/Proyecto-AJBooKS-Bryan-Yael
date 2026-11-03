@@ -1,4 +1,4 @@
-import Foundatio 
+import Foundation
 import SwiftData
 
 @Model
