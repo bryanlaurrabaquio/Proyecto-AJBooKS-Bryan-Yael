@@ -1,7 +1,5 @@
 import SwiftUI
 
-// Single Source of Truth: aquí viven la lista de libros y los favoritos.
-// Las vistas no guardan copias; leen y modifican este objeto compartido.
 @Observable
 class BookStore {
     var books: [Book] = [
@@ -12,28 +10,5 @@ class BookStore {
         Book(title: "Don Quijote de la Mancha", author: "Miguel de Cervantes", year: "1605", genre: "Clásico", description: "Un hidalgo sale a buscar aventuras como caballero andante junto a Sancho Panza."),
         Book(title: "Frankenstein", author: "Mary Shelley", year: "1818", genre: "Terror", description: "Un científico da vida a una criatura y tiene que enfrentar las consecuencias.")
     ]
-
-    // Guardamos solo los ids de los favoritos para no duplicar los libros.
-    var favoriteIDs: [UUID] = []
-
-    // Los favoritos se calculan a partir de la lista única de libros.
-    var favorites: [Book] {
-        books.filter { book in
-            favoriteIDs.contains(book.id)
-        }
-    }
-
-    func isFavorite(_ book: Book) -> Bool {
-        return favoriteIDs.contains(book.id)
-    }
-
-    func toggleFavorite(_ book: Book) {
-        if isFavorite(book) {
-            favoriteIDs.removeAll { id in
-                id == book.id
-            }
-        } else {
-            favoriteIDs.append(book.id)
-        }
-    }
+    
 }
