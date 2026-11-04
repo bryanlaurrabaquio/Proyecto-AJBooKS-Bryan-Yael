@@ -1,99 +1,112 @@
-import Testing
+import XCTest
 @testable import Proyecto_Bry_y_Yael
 
-// Pruebas de la lógica que salió de las vistas: se prueban sin abrir la interfaz.
+// Pruebas unitarias con XCTest. Usan solo datos locales, sin API ni red,
+// así que se ejecutan igual cada vez.
 @MainActor
-struct Proyecto_Bry_y_YaelTests {
+final class Proyecto_Bry_y_YaelTests: XCTestCase {
 
-    // MARK: - Book
+    // MARK: - Búsqueda (BookListViewModel)
 
-    @Test func subtitleUneAnioYGenero() {
-        let book = Book(title: "Frankenstein", author: "Mary Shelley", year: "1818", genre: "Terror", description: "")
-        #expect(book.subtitle == "1818 - Terror")
+    // Caso normal: una búsqueda con coincidencia devuelve ese libro.
+    func testBusquedaNormalEncuentraElLibro() {
+        let viewModel = BookListViewModel(store: BookStore())
+        viewModel.searchText = "principito"
+
+        XCTAssertEqual(viewModel.filteredBooks.count, 1)
+        XCTAssertEqual(viewModel.filteredBooks[0].title, "El principito")
+        XCTAssertFalse(viewModel.noResults)
     }
 
-    // MARK: - BookListViewModel
-
-    @Test func sinBusquedaMuestraTodosLosLibros() {
+    // Caso límite: búsqueda vacía devuelve todo el catálogo.
+    func testBusquedaVaciaDevuelveTodosLosLibros() {
         let store = BookStore()
         let viewModel = BookListViewModel(store: store)
 
-        #expect(viewModel.filteredBooks.count == store.books.count)
-        #expect(viewModel.noResults == false)
+        XCTAssertEqual(viewModel.filteredBooks.count, store.books.count)
+        XCTAssertFalse(viewModel.noResults)
     }
 
-    @Test func busquedaFiltraPorTituloSinImportarMayusculas() {
-        let viewModel = BookListViewModel(store: BookStore())
-        viewModel.searchText = "ODISEA"
-
-        #expect(viewModel.filteredBooks.count == 1)
-        #expect(viewModel.filteredBooks[0].title == "La Odisea")
-    }
-
-    @Test func busquedaSinCoincidenciasActivaNoResults() {
+    // Caso sin resultados: un texto inexistente devuelve lista vacía.
+    func testBusquedaSinCoincidenciasNoDevuelveLibros() {
         let viewModel = BookListViewModel(store: BookStore())
         viewModel.searchText = "zzzz"
 
-        #expect(viewModel.filteredBooks.isEmpty)
-        #expect(viewModel.noResults == true)
+        XCTAssertTrue(viewModel.filteredBooks.isEmpty)
+        XCTAssertTrue(viewModel.noResults)
     }
 
-    @Test func favoritesCountSigueAlStore() {
+    // La búsqueda no distingue mayúsculas de minúsculas.
+    func testBusquedaIgnoraMayusculas() {
+        let viewModel = BookListViewModel(store: BookStore())
+        viewModel.searchText = "ODISEA"
+
+        XCTAssertEqual(viewModel.filteredBooks.count, 1)
+        XCTAssertEqual(viewModel.filteredBooks[0].title, "La Odisea")
+    }
+
+    // MARK: - Identificador estable (Book)
+
+    // El mismo libro siempre produce el mismo id (base para no duplicar).
+    func testElIdDelLibroEsEstable() {
+        let libroA = Book(title: "Frankenstein", author: "Mary Shelley", year: "1818", genre: "Terror", description: "")
+        let libroB = Book(title: "Frankenstein", author: "Mary Shelley", year: "1818", genre: "Terror", description: "")
+
+        XCTAssertEqual(libroA.id, libroB.id)
+    }
+
+    // MARK: - Colección guardada (BookDetailViewModel)
+
+    // Sin nada guardado, el libro se reconoce como no guardado.
+    func testLibroNoGuardadoCuandoLaColeccionEstaVacia() {
+        let book = BookStore().books[0]
+        let viewModel = BookDetailViewModel(book: book)
+        let saved: [FavoriteBook] = []
+
+        XCTAssertFalse(viewModel.isSaved(in: saved))
+        XCTAssertNil(viewModel.savedItem(in: saved))
+        XCTAssertEqual(viewModel.buttonTitle(in: saved), "Guardar")
+    }
+
+    // Si ya está guardado se reconoce por su id (por eso no se vuelve a insertar).
+    func testLibroGuardadoSeReconocePorSuId() {
+        let book = BookStore().books[0]
+        let viewModel = BookDetailViewModel(book: book)
+        let saved = [viewModel.makeFavorite()]
+
+        XCTAssertTrue(viewModel.isSaved(in: saved))
+        XCTAssertNotNil(viewModel.savedItem(in: saved))
+        XCTAssertEqual(viewModel.buttonTitle(in: saved), "Guardado")
+        XCTAssertEqual(viewModel.buttonAccessibilityLabel(in: saved), "Quitar de favoritos")
+    }
+
+    // Un libro guardado distinto no cuenta como este libro.
+    func testOtroLibroGuardadoNoAfectaAEsteLibro() {
         let store = BookStore()
-        let viewModel = BookListViewModel(store: store)
-        #expect(viewModel.favoritesCount == 0)
+        let otro = BookDetailViewModel(book: store.books[1]).makeFavorite()
+        let viewModel = BookDetailViewModel(book: store.books[0])
 
-        store.toggleFavorite(store.books[0])
-        #expect(viewModel.favoritesCount == 1)
+        XCTAssertFalse(viewModel.isSaved(in: [otro]))
     }
 
-    // MARK: - BookDetailViewModel
+    // MARK: - Lista de favoritos (FavoritesViewModel)
 
-    @Test func detalleAlternaGuardadoYTextoDelBoton() {
-        let store = BookStore()
-        let viewModel = BookDetailViewModel(book: store.books[0], store: store)
+    // Sin guardados, la lista de favoritos queda vacía.
+    func testFavoritosVaciosSinLibrosGuardados() {
+        let viewModel = FavoritesViewModel(store: BookStore())
 
-        #expect(viewModel.isSaved == false)
-        #expect(viewModel.buttonTitle == "Guardar")
-        #expect(viewModel.buttonAccessibilityLabel == "Guardar en favoritos")
-
-        viewModel.toggleSaved()
-
-        #expect(viewModel.isSaved == true)
-        #expect(viewModel.buttonTitle == "Guardado")
-        #expect(viewModel.buttonAccessibilityLabel == "Quitar de favoritos")
-        #expect(store.isFavorite(store.books[0]))
+        XCTAssertTrue(viewModel.favoriteBooks(from: []).isEmpty)
     }
 
-    // MARK: - FavoritesViewModel
-
-    @Test func favoritosEmpiezaVacioYSeActualizaConElStore() {
+    // Con guardados, devuelve solo los libros del catálogo que coinciden.
+    func testFavoritosDevuelveSoloLosLibrosGuardados() {
         let store = BookStore()
         let viewModel = FavoritesViewModel(store: store)
-        #expect(viewModel.isEmpty == true)
+        let saved = [BookDetailViewModel(book: store.books[2]).makeFavorite()]
 
-        store.toggleFavorite(store.books[1])
+        let result = viewModel.favoriteBooks(from: saved)
 
-        #expect(viewModel.isEmpty == false)
-        #expect(viewModel.favorites.count == 1)
-    }
-
-    @Test func quitarFavoritoLoSacaDeLaLista() {
-        let store = BookStore()
-        let viewModel = FavoritesViewModel(store: store)
-        store.toggleFavorite(store.books[1])
-
-        viewModel.removeFavorite(store.books[1])
-
-        #expect(viewModel.isEmpty == true)
-    }
-
-    @Test func quitarUnLibroQueNoEsFavoritoNoLoAgrega() {
-        let store = BookStore()
-        let viewModel = FavoritesViewModel(store: store)
-
-        viewModel.removeFavorite(store.books[0])
-
-        #expect(viewModel.isEmpty == true)
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result[0].title, store.books[2].title)
     }
 }

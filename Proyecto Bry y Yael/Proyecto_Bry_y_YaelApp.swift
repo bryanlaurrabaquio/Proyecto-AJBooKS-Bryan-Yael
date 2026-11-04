@@ -1,9 +1,8 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct Proyecto_Bry_y_YaelApp: App {
-    // El BookStore se crea una sola vez, por encima de todas las vistas.
-    // Se le pasa a ContentView, que lo reparte a los ViewModels (no hay copias).
     @State var store = BookStore()
 
     var body: some Scene {
@@ -11,5 +10,8 @@ struct Proyecto_Bry_y_YaelApp: App {
             ContentView(store: store)
                 .preferredColorScheme(.dark)
         }
+        // Crea el ModelContainer y deja el ModelContext disponible
+        // en todas las vistas (para @Query y @Environment).
+        .modelContainer(for: FavoriteBook.self)
     }
 }

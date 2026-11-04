@@ -30,8 +30,4 @@ class BookListViewModel {
         return filteredBooks.isEmpty
     }
 
-    // Número que se muestra en el botón de Favoritos.
-    var favoritesCount: Int {
-        return store.favorites.count
-    }
 }
