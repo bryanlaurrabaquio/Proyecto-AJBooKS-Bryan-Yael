@@ -1,22 +1,17 @@
+
 import Foundation
 import SwiftData
 
+
 @Model
-Class FavoriteBook {
-    
+class FavoriteBook {
     var bookID: String
     var title: String
-    var: author: String
+    var author: String
 
     init(bookID: String, title: String, author: String) {
-
-        self.bookid = bookId
+        self.bookID = bookID
         self.title = title
         self.author = author
-
-
-      
     }
-
-  
 }
