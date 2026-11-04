@@ -1,13 +1,12 @@
 import SwiftUI
+import SwiftData
 
-// Pantalla 1: Inicio (lista de libros con búsqueda).
-// La vista solo dibuja y avisa de las acciones; las reglas viven en BookListViewModel.
 struct ContentView: View {
-    // El ViewModel se crea una sola vez con el BookStore que llega desde la App.
     @State var viewModel: BookListViewModel
-
-    // Se guarda para pasárselo a los ViewModels de las pantallas a las que se navega.
     let store: BookStore
+
+    // @Query se actualiza solo cuando cambia la colección personal.
+    @Query var favorites: [FavoriteBook]
 
     init(store: BookStore) {
         self.store = store
@@ -15,7 +14,6 @@ struct ContentView: View {
     }
 
     var body: some View {
-        // @Bindable permite enlazar searchText del ViewModel con el campo de texto.
         @Bindable var viewModel = viewModel
 
         NavigationStack {
@@ -28,11 +26,11 @@ struct ContentView: View {
 
                     Spacer()
 
-                    // Acceso a Favoritos, con el contador que prepara el ViewModel.
                     NavigationLink(destination: FavoritesView(viewModel: FavoritesViewModel(store: store))) {
                         HStack {
                             Image(systemName: "heart.fill")
-                            Text(String(viewModel.favoritesCount))
+                            // El contador sale directamente de lo guardado.
+                            Text(String(favorites.count))
                         }
                         .foregroundColor(.red)
                     }
@@ -42,7 +40,6 @@ struct ContentView: View {
                 Text("Libros en tendencia")
                     .foregroundColor(.gray)
 
-                // La subvista recibe el texto con @Binding (no tiene copia propia).
                 SearchField(text: $viewModel.searchText)
 
                 if viewModel.noResults {
@@ -54,7 +51,6 @@ struct ContentView: View {
                 ScrollView {
                     VStack(spacing: 10) {
                         ForEach(viewModel.filteredBooks) { book in
-                            // Navegación basada en datos: se envía el libro elegido.
                             NavigationLink(value: book) {
                                 BookRow(book: book)
                             }
@@ -64,7 +60,7 @@ struct ContentView: View {
             }
             .padding()
             .navigationDestination(for: Book.self) { book in
-                SecondView(viewModel: BookDetailViewModel(book: book, store: store))
+                SecondView(viewModel: BookDetailViewModel(book: book))
             }
         }
     }
@@ -72,5 +68,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView(store: BookStore())
+        .modelContainer(for: FavoriteBook.self, inMemory: true)
         .preferredColorScheme(.dark)
 }
