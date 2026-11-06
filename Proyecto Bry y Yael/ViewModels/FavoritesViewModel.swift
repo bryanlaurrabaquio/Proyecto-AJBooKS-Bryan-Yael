@@ -1,20 +1,27 @@
 import Foundation
 import Observation
 
-
+// ViewModel de Favoritos: expone la lista de favoritos y si está vacía.
+@MainActor
 @Observable
-class FavoritesViewModel {
+final class FavoritesViewModel {
     private let store: BookStore
 
     init(store: BookStore) {
         self.store = store
     }
 
-    func favoriteBooks(from saved: [FavoriteBook]) -> [Book] {
-        return store.books.filter { book in
-            saved.contains { item in
-                item.bookID == book.id
-            }
+    var favorites: [Book] {
+        return store.favorites
+    }
+
+    var isEmpty: Bool {
+        return favorites.isEmpty
+    }
+
+    func removeFavorite(_ book: Book) {
+        if store.isFavorite(book) {
+            store.toggleFavorite(book)
         }
     }
 }
