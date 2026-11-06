@@ -3,8 +3,9 @@ import Observation
 
 // ViewModel de Inicio: prepara la lista de libros para ContentView.
 // No importa SwiftUI: solo contiene lógica de presentación.
+@MainActor
 @Observable
-class BookListViewModel {
+final class BookListViewModel {
     // Fuente única de verdad compartida (no se copia).
     private let store: BookStore
 
@@ -16,12 +17,13 @@ class BookListViewModel {
     }
 
     // Libros que coinciden con la búsqueda (early return).
+    // localizedStandardContains ignora mayúsculas y acentos: "paramo" encuentra "Pedro Páramo".
     var filteredBooks: [Book] {
         if searchText == "" {
             return store.books
         }
         return store.books.filter { book in
-            book.title.lowercased().contains(searchText.lowercased())
+            book.title.localizedStandardContains(searchText)
         }
     }
 
@@ -30,4 +32,8 @@ class BookListViewModel {
         return filteredBooks.isEmpty
     }
 
+    // Número que se muestra en el botón de Favoritos.
+    var favoritesCount: Int {
+        return store.favorites.count
+    }
 }

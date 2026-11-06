@@ -1,14 +1,9 @@
 import SwiftUI
-import SwiftData
 
+// Pantalla 2: Detalle del libro.
+// La vista solo muestra y avisa del toque; el estado "guardado" lo maneja BookDetailViewModel.
 struct SecondView: View {
     var viewModel: BookDetailViewModel
-
-    // El contexto permite insertar, eliminar y guardar.
-    @Environment(\.modelContext) var context
-
-    // Lo guardado hasta ahora; la vista se redibuja sola cuando cambia.
-    @Query var saved: [FavoriteBook]
 
     var body: some View {
         ScrollView {
@@ -32,19 +27,19 @@ struct SecondView: View {
                 }
 
                 Button(action: {
-                    toggleSaved()
+                    viewModel.toggleSaved()
                 }) {
                     HStack {
-                        Image(systemName: viewModel.isSaved(in: saved) ? "heart.fill" : "heart")
-                        Text(viewModel.buttonTitle(in: saved))
+                        Image(systemName: viewModel.isSaved ? "heart.fill" : "heart")
+                        Text(viewModel.buttonTitle)
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(viewModel.isSaved(in: saved) ? Color.red : Color.gray)
+                    .background(viewModel.isSaved ? Color.red : Color.gray)
                     .foregroundColor(.white)
                     .cornerRadius(8)
                 }
-                .accessibilityLabel(viewModel.buttonAccessibilityLabel(in: saved))
+                .accessibilityLabel(viewModel.buttonAccessibilityLabel)
 
                 Text("Descripción")
                     .font(.headline)
@@ -60,28 +55,12 @@ struct SecondView: View {
         }
         .navigationTitle("Detalle")
     }
-
-    // Si ya está guardado lo elimina; si no, lo inserta.
-    // Solo inserta cuando NO existe, así que nunca se duplica.
-    func toggleSaved() {
-        if let item = viewModel.savedItem(in: saved) {
-            context.delete(item)
-        } else {
-            context.insert(viewModel.makeFavorite())
-        }
-
-        do {
-            try context.save()
-        } catch {
-            print("No se pudo guardar: \(error)")
-        }
-    }
 }
 
 #Preview {
+    let store = BookStore()
     NavigationStack {
-        SecondView(viewModel: BookDetailViewModel(book: BookStore().books[0]))
+        SecondView(viewModel: BookDetailViewModel(book: store.books[0], store: store))
     }
-    .modelContainer(for: FavoriteBook.self, inMemory: true)
     .preferredColorScheme(.dark)
 }

@@ -3,15 +3,10 @@ import Foundation
 // Solo describe los datos de un libro.
 // Hashable es necesario para navegar con NavigationLink(value:) y navigationDestination(for:).
 struct Book: Identifiable, Hashable {
-    
-    var id: String{
-        
-            return title + " - " + author
-        
-    }
-
-
-    
+    // Identificador estable que entrega la fuente de datos (no se calcula aquí).
+    // Con la API será el campo `key` de Open Library (con la forma "/works/OL...W").
+    // BookStore usa ids locales provisionales.
+    let id: String
     var title: String
     var author: String
     var year: String
