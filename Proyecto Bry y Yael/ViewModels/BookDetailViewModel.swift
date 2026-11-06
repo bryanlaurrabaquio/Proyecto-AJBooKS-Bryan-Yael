@@ -1,42 +1,39 @@
 import Foundation
 import Observation
 
-
+// ViewModel de Detalle: trabaja con un solo libro y su estado de "guardado".
+@MainActor
 @Observable
-class BookDetailViewModel {
+final class BookDetailViewModel {
+    private let store: BookStore
     let book: Book
 
-    init(book: Book) {
+    init(book: Book, store: BookStore) {
         self.book = book
+        self.store = store
     }
 
-    
-    func savedItem(in saved: [FavoriteBook]) -> FavoriteBook? {
-        return saved.first { item in
-            item.bookID == book.id
-        }
+    // Se lee del BookStore, no se guarda una copia aquí.
+    var isSaved: Bool {
+        return store.isFavorite(book)
     }
 
-    func isSaved(in saved: [FavoriteBook]) -> Bool {
-        return savedItem(in: saved) != nil
-    }
-
-    func buttonTitle(in saved: [FavoriteBook]) -> String {
-        if isSaved(in: saved) {
+    var buttonTitle: String {
+        if isSaved {
             return "Guardado"
         }
         return "Guardar"
     }
 
-    func buttonAccessibilityLabel(in saved: [FavoriteBook]) -> String {
-        if isSaved(in: saved) {
+    // Texto que lee VoiceOver en el botón.
+    var buttonAccessibilityLabel: String {
+        if isSaved {
             return "Quitar de favoritos"
         }
         return "Guardar en favoritos"
     }
 
-    
-    func makeFavorite() -> FavoriteBook {
-        return FavoriteBook(bookID: book.id, title: book.title, author: book.author)
+    func toggleSaved() {
+        store.toggleFavorite(book)
     }
 }
