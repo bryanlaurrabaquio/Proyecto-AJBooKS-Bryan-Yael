@@ -44,8 +44,8 @@ struct SecondView: View {
                 Text("Descripción")
                     .font(.headline)
 
-                Text(viewModel.book.description)
-                    .foregroundColor(.gray)
+                Text(viewModel.descriptionText)
+                .foregroundColor(.gray)
 
                 Text("Autor: " + viewModel.book.author)
                 Text("Año: " + viewModel.book.year)
@@ -57,10 +57,26 @@ struct SecondView: View {
     }
 }
 
+
 #Preview {
     let store = BookStore()
+
+    let sampleBook = Book(
+        id: "preview-odisea",
+        title: "La Odisea",
+        author: "Homero",
+        year: "Desconocido",
+        genre: "Aventura",
+        description: "Libro utilizado en la vista previa."
+    )
+
     NavigationStack {
-        SecondView(viewModel: BookDetailViewModel(book: store.books[0], store: store))
+        SecondView(
+            viewModel: BookDetailViewModel(
+                book: sampleBook,
+                store: store
+            )
+        )
     }
     .preferredColorScheme(.dark)
 }

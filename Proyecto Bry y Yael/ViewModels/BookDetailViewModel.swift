@@ -33,7 +33,16 @@ final class BookDetailViewModel {
         return "Guardar en favoritos"
     }
 
+    var descriptionText: String {
+        if book.description.isEmpty {
+            return "Descripción no disponible."
+        }
+
+        return book.description
+    }
+
     func toggleSaved() {
         store.toggleFavorite(book)
     }
+
 }

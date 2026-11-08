@@ -39,27 +39,76 @@ final class BookStore {
         }
     }
 
-    func isFavorite(_ book: Book) -> Bool {
-        return favoriteIDs.contains(book.id)
-    }
 
-    // Agrega o quita el libro en el servicio y vuelve a leer lo guardado,
-    // para que la interfaz siempre muestre lo que realmente está persistido.
-    func toggleFavorite(_ book: Book) {
-        if isFavorite(book) {
-            favoritesService.removeFavorite(book: book)
-        } else {
-            favoritesService.saveFavorite(book: book)
+    import Foundation
+    import Observation
+
+    @MainActor
+    @Observable
+    final class BookStore {
+
+        // Fuente única de verdad del catálogo remoto.
+        var catalogState: LoadState = .idle
+
+        // Los libros se obtienen del estado de la API.
+        var books: [Book] {
+            if case .content(let items) = catalogState {
+                return items
+            }
+            return []
         }
 
-        loadFavorites()
-    }
+        // Favoritos guardados en SwiftData.
+        private(set) var favoriteRecords: [FavoriteBook] = []
 
-    // Lee los favoritos guardados. Si el servicio falla (nil), queda una lista vacía.
-    func loadFavorites() {
-        let saved = favoritesService.fetchFavorites() ?? []
-        favoriteIDs = saved.map { favorite in
-            favorite.bookID
+        var favoriteIDs: [String] {
+            favoriteRecords.map { $0.bookID }
+        }
+
+        // Se reconstruyen desde los datos persistidos.
+        // No dependen de los resultados de Open Library.
+        var favorites: [Book] {
+            favoriteRecords.map { item in
+                Book(
+                    id: item.bookID,
+                    title: item.title,
+                    author: item.author,
+                    year: item.year.isEmpty
+                    ? "Desconocido" : item.year,
+                    genre: item.genre.isEmpty
+                    ? "Sin género" : item.genre,
+                    description: ""
+                )
+            }
+        }
+
+        private let favoritesService: any FavoritesServiceProtocol
+
+        init(
+        favoritesService: any FavoritesServiceProtocol =
+        InMemoryFavoritesService()
+        ) {
+            self.favoritesService = favoritesService
+            loadFavorites()
+        }
+
+        func isFavorite(_ book: Book) -> Bool {
+            favoriteIDs.contains(book.id)
+        }
+
+        func toggleFavorite(_ book: Book) {
+            if isFavorite(book) {
+                favoritesService.removeFavorite(book: book)
+            } else {
+                favoritesService.saveFavorite(book: book)
+            }
+
+            loadFavorites()
+        }
+
+        func loadFavorites() {
+            favoriteRecords =
+            favoritesService.fetchFavorites() ?? []
         }
     }
 }
