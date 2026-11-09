@@ -1,3 +1,4 @@
+
 import Foundation
 import SwiftData
 
@@ -8,7 +9,7 @@ protocol FavoritesServiceProtocol {
     func removeFavorite(book: Book)
 }
 
-// Guarda en disco con SwiftData usando un ModelContext.
+// Guarda en disco con SwiftData utilizando ModelContext.
 class FavoritesService: FavoritesServiceProtocol {
 
     private let context: ModelContext
@@ -17,49 +18,59 @@ class FavoritesService: FavoritesServiceProtocol {
         self.context = context
     }
 
-    // Lee todos los favoritos guardados.
+    // Obtiene los favoritos guardados.
     func fetchFavorites() -> [FavoriteBook]? {
         do {
-            return try context.fetch(FetchDescriptor<FavoriteBook>())
+            return try context.fetch(
+                FetchDescriptor<FavoriteBook>()
+            )
         } catch {
-            print("Hubo un error al leer los favoritos: \(error)")
+            print("Error al leer favoritos: \(error)")
             return nil
         }
     }
 
-    // Busca un favorito por el id del libro.
+    // Busca un favorito por su identificador.
     func searchFavorite(bookID: String) -> [FavoriteBook]? {
-        let description = FetchDescriptor<FavoriteBook>(
+        let descriptor = FetchDescriptor<FavoriteBook>(
             predicate: #Predicate { favorite in
                 favorite.bookID == bookID
             }
         )
 
         do {
-            return try context.fetch(description)
+            return try context.fetch(descriptor)
         } catch {
-            print("Hubo un error al buscar el favorito \(bookID): \(error)")
+            print("Error al buscar favorito \(bookID): \(error)")
             return nil
         }
     }
 
-    // Agrega un libro a la colección. Si ya existe, no lo vuelve a guardar (sin duplicados).
+    // Guarda un libro sin crear duplicados.
     func saveFavorite(book: Book) {
         let existing = searchFavorite(bookID: book.id) ?? []
+
         if !existing.isEmpty {
             return
         }
 
-        context.insert(
-            FavoriteBook(bookID: book.id, title: book.title, author: book.author)
+        let favorite = FavoriteBook(
+            bookID: book.id,
+            title: book.title,
+            author: book.author,
+            year: book.year,
+            genre: book.genre
         )
+
+        context.insert(favorite)
 
         save()
     }
 
-    //Eliminacion de libros.
+    // Elimina un libro de favoritos.
     func removeFavorite(book: Book) {
         let existing = searchFavorite(bookID: book.id) ?? []
+
         for favorite in existing {
             context.delete(favorite)
         }
@@ -67,16 +78,18 @@ class FavoritesService: FavoritesServiceProtocol {
         save()
     }
 
+    // Guarda los cambios en SwiftData.
     private func save() {
         do {
             try context.save()
         } catch {
-            print("Hubo un error al guardar: \(error)")
+            print("Error al guardar favoritos: \(error)")
         }
     }
 }
 
-
+// Servicio de favoritos en memoria.
+// Se utiliza en Previews y pruebas unitarias.
 class InMemoryFavoritesService: FavoritesServiceProtocol {
 
     private var saved: [FavoriteBook] = []
@@ -89,12 +102,20 @@ class InMemoryFavoritesService: FavoritesServiceProtocol {
         let alreadySaved = saved.contains { favorite in
             favorite.bookID == book.id
         }
+
         if alreadySaved {
             return
         }
-        saved.append(
-            FavoriteBook(bookID: book.id, title: book.title, author: book.author)
+
+        let favorite = FavoriteBook(
+            bookID: book.id,
+            title: book.title,
+            author: book.author,
+            year: book.year,
+            genre: book.genre
         )
+
+        saved.append(favorite)
     }
 
     func removeFavorite(book: Book) {

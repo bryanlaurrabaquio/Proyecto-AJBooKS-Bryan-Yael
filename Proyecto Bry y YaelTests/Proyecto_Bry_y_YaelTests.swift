@@ -1,7 +1,8 @@
 import Testing
 @testable import Proyecto_Bry_y_Yael
 
-// Pruebas de la lógica que salió de las vistas: se prueban sin abrir la interfaz.
+// Pruebas de la lógica de la aplicación.
+// Utilizan libros simulados sin depender de internet.
 @MainActor
 struct Proyecto_Bry_y_YaelTests {
 
@@ -9,7 +10,14 @@ struct Proyecto_Bry_y_YaelTests {
 
     @Test func subtitleUneAnioYGenero() {
         // Arrange
-        let book = Book(id: "local-frankenstein", title: "Frankenstein", author: "Mary Shelley", year: "1818", genre: "Terror", description: "")
+        let book = Book(
+            id: "local-frankenstein",
+            title: "Frankenstein",
+            author: "Mary Shelley",
+            year: "1818",
+            genre: "Terror",
+            description: ""
+        )
 
         // Act
         let subtitle = book.subtitle
@@ -22,7 +30,7 @@ struct Proyecto_Bry_y_YaelTests {
 
     @Test func sinBusquedaMuestraTodosLosLibros() {
         // Arrange
-        let store = BookStore()
+        let store = makeSeededStore()
         let viewModel = BookListViewModel(store: store)
 
         // Act
@@ -30,19 +38,22 @@ struct Proyecto_Bry_y_YaelTests {
 
         // Assert
         #expect(result.count == store.books.count)
+        #expect(result.count == 6)
         #expect(viewModel.noResults == false)
     }
 
-    // Parametrizada: la misma prueba con distintas formas de escribir "La Odisea".
+    // La búsqueda no distingue mayúsculas de minúsculas.
     @Test(arguments: [
-        "odisea",
-        "ODISEA",
-        "Odisea",
-        "OdIsEa"
+    "odisea",
+    "ODISEA",
+    "Odisea",
+    "OdIsEa"
     ])
     func busquedaNoDistingueMayusculas(texto: String) {
         // Arrange
-        let viewModel = BookListViewModel(store: BookStore())
+        let viewModel = BookListViewModel(
+            store: makeSeededStore()
+        )
 
         // Act
         viewModel.searchText = texto
@@ -52,16 +63,18 @@ struct Proyecto_Bry_y_YaelTests {
         #expect(viewModel.filteredBooks[0].title == "La Odisea")
     }
 
-    // Parametrizada: con o sin acento debe encontrar "Pedro Páramo".
+    // La búsqueda ignora diferencias de acentos.
     @Test(arguments: [
-        "paramo",
-        "PARAMO",
-        "páramo",
-        "Páramo"
+    "paramo",
+    "PARAMO",
+    "páramo",
+    "Páramo"
     ])
     func busquedaNoDistingueAcentos(texto: String) {
         // Arrange
-        let viewModel = BookListViewModel(store: BookStore())
+        let viewModel = BookListViewModel(
+            store: makeSeededStore()
+        )
 
         // Act
         viewModel.searchText = texto
@@ -71,15 +84,17 @@ struct Proyecto_Bry_y_YaelTests {
         #expect(viewModel.filteredBooks[0].title == "Pedro Páramo")
     }
 
-    // Parametrizada: textos que no coinciden con ningún título.
+    // Una búsqueda sin coincidencias devuelve una lista vacía.
     @Test(arguments: [
-        "zzzz",
-        "xyz",
-        "12345"
+    "zzzz",
+    "xyz",
+    "12345"
     ])
     func busquedaSinCoincidenciasActivaNoResults(texto: String) {
         // Arrange
-        let viewModel = BookListViewModel(store: BookStore())
+        let viewModel = BookListViewModel(
+            store: makeSeededStore()
+        )
 
         // Act
         viewModel.searchText = texto
@@ -89,10 +104,13 @@ struct Proyecto_Bry_y_YaelTests {
         #expect(viewModel.noResults == true)
     }
 
+    // MARK: - Contador de favoritos
+
     @Test func favoritesCountSigueAlStore() {
         // Arrange
-        let store = BookStore()
+        let store = makeSeededStore()
         let viewModel = BookListViewModel(store: store)
+
         #expect(viewModel.favoritesCount == 0)
 
         // Act
@@ -106,11 +124,19 @@ struct Proyecto_Bry_y_YaelTests {
 
     @Test func detalleAlternaGuardadoYTextoDelBoton() {
         // Arrange
-        let store = BookStore()
-        let viewModel = BookDetailViewModel(book: store.books[0], store: store)
+        let store = makeSeededStore()
+
+        let viewModel = BookDetailViewModel(
+            book: store.books[0],
+            store: store
+        )
+
         #expect(viewModel.isSaved == false)
         #expect(viewModel.buttonTitle == "Guardar")
-        #expect(viewModel.buttonAccessibilityLabel == "Guardar en favoritos")
+        #expect(
+            viewModel.buttonAccessibilityLabel
+            == "Guardar en favoritos"
+        )
 
         // Act
         viewModel.toggleSaved()
@@ -118,7 +144,10 @@ struct Proyecto_Bry_y_YaelTests {
         // Assert
         #expect(viewModel.isSaved == true)
         #expect(viewModel.buttonTitle == "Guardado")
-        #expect(viewModel.buttonAccessibilityLabel == "Quitar de favoritos")
+        #expect(
+            viewModel.buttonAccessibilityLabel
+            == "Quitar de favoritos"
+        )
         #expect(store.isFavorite(store.books[0]))
     }
 
@@ -126,8 +155,9 @@ struct Proyecto_Bry_y_YaelTests {
 
     @Test func favoritosEmpiezaVacioYSeActualizaConElStore() {
         // Arrange
-        let store = BookStore()
+        let store = makeSeededStore()
         let viewModel = FavoritesViewModel(store: store)
+
         #expect(viewModel.isEmpty == true)
 
         // Act
@@ -140,8 +170,9 @@ struct Proyecto_Bry_y_YaelTests {
 
     @Test func quitarFavoritoLoSacaDeLaLista() {
         // Arrange
-        let store = BookStore()
+        let store = makeSeededStore()
         let viewModel = FavoritesViewModel(store: store)
+
         store.toggleFavorite(store.books[1])
 
         // Act
@@ -153,7 +184,7 @@ struct Proyecto_Bry_y_YaelTests {
 
     @Test func quitarUnLibroQueNoEsFavoritoNoLoAgrega() {
         // Arrange
-        let store = BookStore()
+        let store = makeSeededStore()
         let viewModel = FavoritesViewModel(store: store)
 
         // Act

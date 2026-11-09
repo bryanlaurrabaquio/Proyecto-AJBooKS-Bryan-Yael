@@ -1,39 +1,107 @@
+
 import Foundation
 import Observation
 
-// ViewModel de Inicio: prepara la lista de libros para ContentView.
-// No importa SwiftUI: solo contiene lógica de presentación.
 @MainActor
 @Observable
 final class BookListViewModel {
-    // Fuente única de verdad compartida (no se copia).
-    private let store: BookStore
 
-    // Estado local de la pantalla: el texto de búsqueda.
+    static let featuredQuery = "subject:classics"
+
+    private let store: BookStore
+    private let service: any BookServicing
+
     var searchText = ""
 
-    init(store: BookStore) {
+    init(
+    store: BookStore,
+    service: any BookServicing = OpenLibraryService()
+    ) {
         self.store = store
+        self.service = service
     }
 
-    // Libros que coinciden con la búsqueda (early return).
-    // localizedStandardContains ignora mayúsculas y acentos: "paramo" encuentra "Pedro Páramo".
+    // Se lee directamente del BookStore.
+    var state: LoadState {
+        store.catalogState
+    }
+
+    var books: [Book] {
+        store.books
+    }
+
+    // Búsqueda local sobre los libros descargados.
     var filteredBooks: [Book] {
-        if searchText == "" {
-            return store.books
+        let text = searchText.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+
+        if text.isEmpty {
+            return books
         }
-        return store.books.filter { book in
-            book.title.localizedStandardContains(searchText)
+
+        return books.filter { book in
+            book.title.localizedStandardContains(text)
+            || book.author.localizedStandardContains(text)
         }
     }
 
-    // La vista solo muestra u oculta el mensaje, no repite la cuenta.
+    // Solo se considera "sin coincidencias"
+    // cuando la API sí entregó libros.
     var noResults: Bool {
-        return filteredBooks.isEmpty
+        if case .content = state {
+            return filteredBooks.isEmpty
+        }
+
+        return false
     }
 
-    // Número que se muestra en el botón de Favoritos.
     var favoritesCount: Int {
-        return store.favorites.count
+        store.favorites.count
+    }
+
+    // Evita descargar repetidamente el catálogo.
+    func loadIfNeeded() async {
+        if case .idle = state {
+            await loadBooks()
+        }
+    }
+
+    func retry() async {
+        await loadBooks()
+    }
+
+    func loadBooks() async {
+
+        if case .loading = state {
+            return
+        }
+
+        store.catalogState = .loading
+
+        do {
+            let downloadedBooks = try await service.fetchBooks(
+                query: Self.featuredQuery
+            )
+
+            try Task.checkCancellation()
+
+            if downloadedBooks.isEmpty {
+                store.catalogState = .empty
+            } else {
+                store.catalogState = .content(downloadedBooks)
+            }
+
+        } catch is CancellationError {
+            store.catalogState = .idle
+
+        } catch let error as BookServiceError {
+            store.catalogState = .error(error)
+
+        } catch {
+            store.catalogState = .error(
+                .unknown(String(describing: error))
+            )
+        }
     }
 }
