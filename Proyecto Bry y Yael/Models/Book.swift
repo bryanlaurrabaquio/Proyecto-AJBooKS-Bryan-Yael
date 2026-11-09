@@ -9,15 +9,18 @@ struct Book: Identifiable, Hashable {
     let id: String
     var title: String
     var author: String
-    var year: String
-    var genre: String
+    // La API no siempre entrega año ni género, por eso son opcionales (nil = dato no disponible).
+    var year: Int?
+    var genre: String?
     var description: String
 }
 
 // Dato calculado del Model: el formato "año - género" se arma en un solo lugar,
 // así todas las pantallas muestran el mismo texto.
+// Solo une los datos que existen; si no hay ninguno devuelve nil.
 extension Book {
-    var subtitle: String {
-        return year + " - " + genre
+    var subtitle: String? {
+        let parts = [year.map { String($0) }, genre].compactMap { $0 }
+        return parts.isEmpty ? nil : parts.joined(separator: " - ")
     }
 }
