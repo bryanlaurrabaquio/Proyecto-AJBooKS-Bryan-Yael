@@ -40,12 +40,12 @@ final class BookStoreFavoritesTests: XCTestCase {
     // Caso normal: al crearse, el BookStore carga lo que ya estaba guardado.
     func testStoreLoadsSavedFavoritesFromService() {
         // Arrange
-        let book = BookStore().books[5]
+        let book = makeSeededStore().books[5]
         let saved = FavoriteBook(bookID: book.id, title: book.title, author: book.author)
         let mockService = MockFavoritesService(storedFavorites: [saved])
 
         // Act
-        let store = BookStore(favoritesService: mockService)
+        let store = makeSeededStore(favoritesService: mockService)
 
         // Assert
         XCTAssertTrue(store.isFavorite(store.books[5]))
@@ -57,7 +57,7 @@ final class BookStoreFavoritesTests: XCTestCase {
     func testToggleFavoriteSavesThroughService() {
         // Arrange
         let mockService = MockFavoritesService()
-        let store = BookStore(favoritesService: mockService)
+        let store = makeSeededStore(favoritesService: mockService)
 
         // Act
         store.toggleFavorite(store.books[0])
@@ -72,7 +72,7 @@ final class BookStoreFavoritesTests: XCTestCase {
     func testToggleFavoriteTwiceRemovesIt() {
         // Arrange
         let mockService = MockFavoritesService()
-        let store = BookStore(favoritesService: mockService)
+        let store = makeSeededStore(favoritesService: mockService)
 
         // Act
         store.toggleFavorite(store.books[0])
@@ -90,7 +90,7 @@ final class BookStoreFavoritesTests: XCTestCase {
         let mockService = MockFavoritesService(storedFavorites: nil)
 
         // Act
-        let store = BookStore(favoritesService: mockService)
+        let store = makeSeededStore(favoritesService: mockService)
 
         // Assert
         XCTAssertTrue(store.favoriteIDs.isEmpty)
@@ -101,10 +101,10 @@ final class BookStoreFavoritesTests: XCTestCase {
     func testFavoriteIsRecognizedByIDNotByTitle() {
         // Arrange
         let mockService = MockFavoritesService()
-        let store = BookStore(favoritesService: mockService)
+        let store = makeSeededStore(favoritesService: mockService)
         let original = store.books[0]
         let otraEdicion = Book(id: "local-otra-edicion", title: original.title, author: original.author, year: "2000", genre: original.genre, description: "")
-        store.books.append(otraEdicion)
+        store.catalogState = .content(store.books + [otraEdicion])
 
         // Act
         store.toggleFavorite(original)
@@ -118,7 +118,7 @@ final class BookStoreFavoritesTests: XCTestCase {
     func testListViewModelCountFollowsPersistedFavorites() {
         // Arrange
         let mockService = MockFavoritesService()
-        let store = BookStore(favoritesService: mockService)
+        let store = makeSeededStore(favoritesService: mockService)
         let viewModel = BookListViewModel(store: store)
 
         // Act
