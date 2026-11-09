@@ -28,8 +28,13 @@ struct FavoritesView: View {
 }
 
 #Preview {
+    // Store en memoria con un par de favoritos de ejemplo.
     NavigationStack {
-        FavoritesView(viewModel: FavoritesViewModel(store: BookStore()))
+        FavoritesView(
+            viewModel: FavoritesViewModel(
+                store: .preview(favorites: Array(Book.samples.prefix(2)))
+            )
+        )
     }
     .preferredColorScheme(.dark)
 }

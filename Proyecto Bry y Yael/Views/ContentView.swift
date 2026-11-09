@@ -10,9 +10,10 @@ struct ContentView: View {
     // Se guarda para pasárselo a los ViewModels de las pantallas a las que se navega.
     let store: BookStore
 
-    init(store: BookStore) {
+    // El servicio se puede sustituir (por ejemplo, en la vista previa) sin tocar la red.
+    init(store: BookStore, service: any BookServicing = OpenLibraryService()) {
         self.store = store
-        _viewModel = State(initialValue: BookListViewModel(store: store))
+        _viewModel = State(initialValue: BookListViewModel(store: store, service: service))
     }
 
     var body: some View {
@@ -131,8 +132,8 @@ struct ContentView: View {
     }
 }
 
-// La vista previa consulta Open Library de verdad (datos reales, no mocks).
+// La vista previa usa un servicio falso con datos de ejemplo (Book+Samples.swift).
 #Preview {
-    ContentView(store: BookStore())
+    ContentView(store: BookStore(), service: PreviewBookService())
         .preferredColorScheme(.dark)
 }
