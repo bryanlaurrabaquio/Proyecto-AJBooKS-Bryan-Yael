@@ -15,7 +15,7 @@ InMemoryFavoritesService()
             id: "local-odisea",
             title: "La Odisea",
             author: "Homero",
-            year: "Desconocido",
+            year: nil,
             genre: "Aventura",
             description: ""
         ),
@@ -23,7 +23,7 @@ InMemoryFavoritesService()
             id: "local-principito",
             title: "El principito",
             author: "Antoine de Saint-Exupéry",
-            year: "1943",
+            year: 1943,
             genre: "Fantasía",
             description: ""
         ),
@@ -31,7 +31,7 @@ InMemoryFavoritesService()
             id: "local-cien-anos",
             title: "Cien años de soledad",
             author: "Gabriel García Márquez",
-            year: "1967",
+            year: 1967,
             genre: "Realismo mágico",
             description: ""
         ),
@@ -39,7 +39,7 @@ InMemoryFavoritesService()
             id: "local-pedro-paramo",
             title: "Pedro Páramo",
             author: "Juan Rulfo",
-            year: "1955",
+            year: 1955,
             genre: "Realismo mágico",
             description: ""
         ),
@@ -47,7 +47,7 @@ InMemoryFavoritesService()
             id: "local-quijote",
             title: "Don Quijote de la Mancha",
             author: "Miguel de Cervantes",
-            year: "1605",
+            year: 1605,
             genre: "Clásico",
             description: ""
         ),
@@ -55,7 +55,7 @@ InMemoryFavoritesService()
             id: "local-frankenstein",
             title: "Frankenstein",
             author: "Mary Shelley",
-            year: "1818",
+            year: 1818,
             genre: "Terror",
             description: ""
         )
