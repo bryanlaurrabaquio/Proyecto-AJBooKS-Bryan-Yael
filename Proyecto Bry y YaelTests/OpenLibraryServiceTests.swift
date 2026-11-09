@@ -28,6 +28,24 @@ private struct MockBookService: BookServicing {
     }
 }
 
+// Falla la primera vez y funciona la segunda: sirve para probar el botón Reintentar.
+private final class FlakyBookService: BookServicing {
+    private var calls = 0
+    let books: [Book]
+
+    init(books: [Book]) {
+        self.books = books
+    }
+
+    func fetchBooks(query: String) async throws -> [Book] {
+        calls += 1
+        if calls == 1 {
+            throw BookServiceError.connectivity(.notConnectedToInternet)
+        }
+        return books
+    }
+}
+
 @MainActor
 final class OpenLibraryServiceTests: XCTestCase {
 
@@ -253,5 +271,65 @@ final class OpenLibraryServiceTests: XCTestCase {
             store.favorites[0].title,
             "Libro guardado"
         )
+    }
+
+    // El ViewModel debe representar el error del servicio en el estado.
+    func testViewModelRepresentaElError() async {
+        let store = BookStore()
+
+        let viewModel = BookListViewModel(
+            store: store,
+            service: MockBookService(
+                result: .failure(BookServiceError.httpStatus(500))
+            )
+        )
+
+        await viewModel.loadBooks()
+
+        XCTAssertEqual(store.catalogState, .error(.httpStatus(500)))
+        XCTAssertTrue(store.books.isEmpty)
+    }
+
+    // Reintentar después de un error debe cargar los libros.
+    func testReintentarDespuesDeUnError() async {
+        let book = Book(
+            id: "/works/OL1W",
+            title: "Libro de prueba",
+            author: "Autora",
+            year: "1900",
+            genre: "Novela",
+            description: ""
+        )
+
+        let store = BookStore()
+
+        let viewModel = BookListViewModel(
+            store: store,
+            service: FlakyBookService(books: [book])
+        )
+
+        await viewModel.loadBooks()
+        XCTAssertEqual(
+            store.catalogState,
+            .error(.connectivity(.notConnectedToInternet))
+        )
+
+        await viewModel.retry()
+        XCTAssertEqual(store.catalogState, .content([book]))
+    }
+
+    // Solo se descarga si todavía no se había pedido el catálogo.
+    func testLoadIfNeededNoRepiteLaDescarga() async {
+        let store = BookStore()
+        store.catalogState = .empty
+
+        let viewModel = BookListViewModel(
+            store: store,
+            service: MockBookService(result: .success([]))
+        )
+
+        await viewModel.loadIfNeeded()
+
+        XCTAssertEqual(store.catalogState, .empty)
     }
 }
