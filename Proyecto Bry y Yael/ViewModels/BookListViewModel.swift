@@ -99,9 +99,7 @@ final class BookListViewModel {
             store.catalogState = .error(error)
 
         } catch {
-            store.catalogState = .error(
-                .unknown(String(describing: error))
-            )
+            store.catalogState = .error(.unknown)
         }
     }
 }
