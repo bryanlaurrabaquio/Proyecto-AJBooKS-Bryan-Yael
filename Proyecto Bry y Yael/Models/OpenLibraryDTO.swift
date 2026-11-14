@@ -23,20 +23,17 @@ struct OpenLibraryDocument: Decodable {
         ? "Autor desconocido"
         : authors.joined(separator: ", ")
 
-        let year = firstPublishYear.map(String.init)
-        ?? "Desconocido"
-
         let genre = subject?.first {
             !$0.trimmingCharacters(
                 in: .whitespacesAndNewlines
             ).isEmpty
-        } ?? "Sin género"
+        }
 
         return Book(
             id: key,
             title: title,
             author: author,
-            year: year,
+            year: firstPublishYear,
             genre: genre,
             description: ""
         )

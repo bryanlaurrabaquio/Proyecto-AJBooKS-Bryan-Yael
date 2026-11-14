@@ -48,8 +48,8 @@ struct SecondView: View {
                 .foregroundColor(.gray)
 
                 Text("Autor: " + viewModel.book.author)
-                Text("Año: " + viewModel.book.year)
-                Text("Género: " + viewModel.book.genre)
+                Text("Año: " + viewModel.yearText)
+                Text("Género: " + viewModel.genreText)
             }
             .padding()
         }
@@ -59,22 +59,12 @@ struct SecondView: View {
 
 
 #Preview {
-    let store = BookStore()
-
-    let sampleBook = Book(
-        id: "preview-odisea",
-        title: "La Odisea",
-        author: "Homero",
-        year: "Desconocido",
-        genre: "Aventura",
-        description: "Libro utilizado en la vista previa."
-    )
-
+    // Datos de ejemplo (Book+Samples.swift): sin red y fáciles de modificar.
     NavigationStack {
         SecondView(
             viewModel: BookDetailViewModel(
-                book: sampleBook,
-                store: store
+                book: Book.samples[0],
+                store: BookStore()
             )
         )
     }

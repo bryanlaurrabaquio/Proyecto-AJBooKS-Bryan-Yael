@@ -54,13 +54,7 @@ class FavoritesService: FavoritesServiceProtocol {
             return
         }
 
-        let favorite = FavoriteBook(
-            bookID: book.id,
-            title: book.title,
-            author: book.author,
-            year: book.year,
-            genre: book.genre
-        )
+        let favorite = FavoriteBook(book: book)
 
         context.insert(favorite)
 
@@ -107,13 +101,7 @@ class InMemoryFavoritesService: FavoritesServiceProtocol {
             return
         }
 
-        let favorite = FavoriteBook(
-            bookID: book.id,
-            title: book.title,
-            author: book.author,
-            year: book.year,
-            genre: book.genre
-        )
+        let favorite = FavoriteBook(book: book)
 
         saved.append(favorite)
     }

@@ -14,7 +14,7 @@ struct Proyecto_Bry_y_YaelTests {
             id: "local-frankenstein",
             title: "Frankenstein",
             author: "Mary Shelley",
-            year: "1818",
+            year: 1818,
             genre: "Terror",
             description: ""
         )
@@ -24,6 +24,72 @@ struct Proyecto_Bry_y_YaelTests {
 
         // Assert
         #expect(subtitle == "1818 - Terror")
+    }
+
+    @Test func subtitleSinAnioMuestraSoloElGenero() {
+        // Arrange
+        let book = Book(
+            id: "local-odisea",
+            title: "La Odisea",
+            author: "Homero",
+            year: nil,
+            genre: "Aventura",
+            description: ""
+        )
+
+        // Assert
+        #expect(book.subtitle == "Aventura")
+    }
+
+    @Test func subtitleSinAnioNiGeneroEsNil() {
+        // Arrange
+        let book = Book(
+            id: "local-sin-datos",
+            title: "Libro sin datos",
+            author: "Autor",
+            year: nil,
+            genre: nil,
+            description: ""
+        )
+
+        // Assert
+        #expect(book.subtitle == nil)
+    }
+
+    // MARK: - Favoritos con datos opcionales
+
+    @Test func favoritoConservaLosDatosQueFaltan() {
+        // Arrange
+        let store = makeSeededStore()
+        let sinAnio = Book(
+            id: "local-sin-anio",
+            title: "Sin año",
+            author: "Autor",
+            year: nil,
+            genre: nil,
+            description: ""
+        )
+
+        // Act
+        store.toggleFavorite(sinAnio)
+
+        // Assert: lo que no existía sigue siendo nil (no se inventan valores).
+        #expect(store.favorites.count == 1)
+        #expect(store.favorites[0].year == nil)
+        #expect(store.favorites[0].genre == nil)
+    }
+
+    @Test func favoritoConservaAnioYGenero() {
+        // Arrange
+        let store = makeSeededStore()
+        let frankenstein = store.books[5]
+
+        // Act
+        store.toggleFavorite(frankenstein)
+
+        // Assert
+        #expect(store.favorites[0].year == 1818)
+        #expect(store.favorites[0].genre == "Terror")
     }
 
     // MARK: - BookListViewModel
@@ -149,6 +215,26 @@ struct Proyecto_Bry_y_YaelTests {
             == "Quitar de favoritos"
         )
         #expect(store.isFavorite(store.books[0]))
+    }
+
+    @Test func detalleMuestraTextoCuandoFaltanAnioOGenero() {
+        // Arrange
+        let store = makeSeededStore()
+        let sinDatos = Book(
+            id: "local-sin-datos",
+            title: "Libro sin datos",
+            author: "Autor",
+            year: nil,
+            genre: nil,
+            description: ""
+        )
+
+        // Act
+        let viewModel = BookDetailViewModel(book: sinDatos, store: store)
+
+        // Assert
+        #expect(viewModel.yearText == "Desconocido")
+        #expect(viewModel.genreText == "Sin género")
     }
 
     // MARK: - FavoritesViewModel

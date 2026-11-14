@@ -41,6 +41,15 @@ final class BookDetailViewModel {
         return book.description
     }
 
+    // Textos para mostrar cuando la API no entregó el dato.
+    var yearText: String {
+        book.year.map { String($0) } ?? "Desconocido"
+    }
+
+    var genreText: String {
+        book.genre ?? "Sin género"
+    }
+
     func toggleSaved() {
         store.toggleFavorite(book)
     }

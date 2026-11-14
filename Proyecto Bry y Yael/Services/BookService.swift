@@ -86,12 +86,10 @@ struct OpenLibraryService: BookServicing {
             if error.code == .cancelled {
                 throw CancellationError()
             }
-            throw BookServiceError.connectivity(error.code)
+            throw BookServiceError.connectivity
 
         } catch {
-            throw BookServiceError.unknown(
-                String(describing: error)
-            )
+            throw BookServiceError.unknown
         }
 
         try Task.checkCancellation()
@@ -125,9 +123,7 @@ struct OpenLibraryService: BookServicing {
             return books
 
         } catch {
-            throw BookServiceError.decoding(
-                String(describing: error)
-            )
+            throw BookServiceError.decoding
         }
     }
 }

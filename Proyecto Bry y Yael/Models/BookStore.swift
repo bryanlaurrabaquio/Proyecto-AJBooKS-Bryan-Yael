@@ -28,18 +28,7 @@ final class BookStore {
     // Se reconstruyen desde los datos persistidos.
     // No dependen de los resultados de Open Library.
     var favorites: [Book] {
-        favoriteRecords.map { item in
-            Book(
-                id: item.bookID,
-                title: item.title,
-                author: item.author,
-                year: item.year.isEmpty
-                ? "Desconocido" : item.year,
-                genre: item.genre.isEmpty
-                ? "Sin género" : item.genre,
-                description: ""
-            )
-        }
+        favoriteRecords.map { $0.toBook() }
     }
 
     private let favoritesService: any FavoritesServiceProtocol

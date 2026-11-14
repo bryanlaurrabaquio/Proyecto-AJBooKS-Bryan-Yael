@@ -22,9 +22,12 @@ struct BookRow: View {
                     .foregroundColor(.gray)
 
                 // El formato "año - género" viene del Model (Book.subtitle).
-                Text(book.subtitle)
-                    .font(.caption)
-                    .foregroundColor(.red)
+                // Si el libro no tiene ninguno de los dos datos, no se muestra la línea.
+                if let subtitle = book.subtitle {
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                }
             }
 
             Spacer()
@@ -36,6 +39,6 @@ struct BookRow: View {
 }
 
 #Preview {
-    BookRow(book: BookStore().books[0])
+    BookRow(book: Book.samples[0])
         .preferredColorScheme(.dark)
 }

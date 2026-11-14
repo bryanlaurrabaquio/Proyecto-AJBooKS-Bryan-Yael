@@ -103,7 +103,7 @@ final class BookStoreFavoritesTests: XCTestCase {
         let mockService = MockFavoritesService()
         let store = makeSeededStore(favoritesService: mockService)
         let original = store.books[0]
-        let otraEdicion = Book(id: "local-otra-edicion", title: original.title, author: original.author, year: "2000", genre: original.genre, description: "")
+        let otraEdicion = Book(id: "local-otra-edicion", title: original.title, author: original.author, year: 2000, genre: original.genre, description: "")
         store.catalogState = .content(store.books + [otraEdicion])
 
         // Act

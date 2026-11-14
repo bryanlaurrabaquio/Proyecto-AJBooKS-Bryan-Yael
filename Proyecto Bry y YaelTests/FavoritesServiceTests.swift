@@ -10,8 +10,8 @@ final class FavoritesServiceTests: XCTestCase {
     // El contenedor se guarda en una propiedad para que siga vivo durante toda la prueba.
     private var container: ModelContainer?
 
-    private let frankenstein = Book(id: "local-frankenstein", title: "Frankenstein", author: "Mary Shelley", year: "1818", genre: "Terror", description: "")
-    private let pedroParamo = Book(id: "local-pedro-paramo", title: "Pedro Páramo", author: "Juan Rulfo", year: "1955", genre: "Realismo mágico", description: "")
+    private let frankenstein = Book(id: "local-frankenstein", title: "Frankenstein", author: "Mary Shelley", year: 1818, genre: "Terror", description: "")
+    private let pedroParamo = Book(id: "local-pedro-paramo", title: "Pedro Páramo", author: "Juan Rulfo", year: 1955, genre: "Realismo mágico", description: "")
 
     // Crea un contexto nuevo sobre una base de datos temporal (isStoredInMemoryOnly: true).
     private func makeContext() throws -> ModelContext {
@@ -118,7 +118,7 @@ final class FavoritesServiceTests: XCTestCase {
     func testBooksWithSameTitleButDifferentIDAreDifferentFavorites() throws {
         // Arrange
         let service = FavoritesService(context: try makeContext())
-        let otraEdicion = Book(id: "local-frankenstein-otra-edicion", title: "Frankenstein", author: "Mary Shelley", year: "1831", genre: "Terror", description: "")
+        let otraEdicion = Book(id: "local-frankenstein-otra-edicion", title: "Frankenstein", author: "Mary Shelley", year: 1831, genre: "Terror", description: "")
 
         // Act
         service.saveFavorite(book: frankenstein)

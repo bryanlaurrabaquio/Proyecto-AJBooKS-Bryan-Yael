@@ -1,12 +1,14 @@
 import Foundation
 
+// Solo conserva los datos que la app realmente usa:
+// el código HTTP se muestra en el mensaje; los demás casos no necesitan valor.
 enum BookServiceError: Error, Equatable {
     case invalidURL
-    case connectivity(URLError.Code)
+    case connectivity
     case invalidResponse
     case httpStatus(Int)
-    case decoding(String)
-    case unknown(String)
+    case decoding
+    case unknown
 }
 
 extension BookServiceError: LocalizedError {
@@ -30,28 +32,6 @@ extension BookServiceError: LocalizedError {
 
         case .unknown:
             return "Ocurrió un error inesperado."
-        }
-    }
-
-    var failureReason: String? {
-        switch self {
-        case .invalidURL:
-            return "URL inválida"
-
-        case .connectivity(let code):
-            return "URLError: \(code.rawValue)"
-
-        case .invalidResponse:
-            return "La respuesta no es HTTP"
-
-        case .httpStatus(let code):
-            return "HTTP \(code)"
-
-        case .decoding(let detail):
-            return detail
-
-        case .unknown(let detail):
-            return detail
         }
     }
 }

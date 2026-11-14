@@ -40,7 +40,7 @@ private final class FlakyBookService: BookServicing {
     func fetchBooks(query: String) async throws -> [Book] {
         calls += 1
         if calls == 1 {
-            throw BookServiceError.connectivity(.notConnectedToInternet)
+            throw BookServiceError.connectivity
         }
         return books
     }
@@ -105,7 +105,7 @@ final class OpenLibraryServiceTests: XCTestCase {
         XCTAssertEqual(books[0].id, "/works/OL1W")
         XCTAssertEqual(books[0].title, "Libro de prueba")
         XCTAssertEqual(books[0].author, "Autora de prueba")
-        XCTAssertEqual(books[0].year, "1900")
+        XCTAssertEqual(books[0].year, 1900)
         XCTAssertEqual(books[0].genre, "Novela")
     }
 
@@ -121,8 +121,8 @@ final class OpenLibraryServiceTests: XCTestCase {
             books[1].author,
             "Autor desconocido"
         )
-        XCTAssertEqual(books[1].year, "Desconocido")
-        XCTAssertEqual(books[1].genre, "Sin género")
+        XCTAssertNil(books[1].year)
+        XCTAssertNil(books[1].genre)
     }
 
     // Una respuesta vacía no es un error HTTP.
@@ -195,7 +195,7 @@ final class OpenLibraryServiceTests: XCTestCase {
         } catch {
             XCTAssertEqual(
                 error as? BookServiceError,
-                .connectivity(.notConnectedToInternet)
+                .connectivity
             )
         }
     }
@@ -206,7 +206,7 @@ final class OpenLibraryServiceTests: XCTestCase {
             id: "/works/OL1W",
             title: "Libro de prueba",
             author: "Autora",
-            year: "1900",
+            year: 1900,
             genre: "Novela",
             description: ""
         )
@@ -254,7 +254,7 @@ final class OpenLibraryServiceTests: XCTestCase {
             id: "/works/OL1W",
             title: "Libro guardado",
             author: "Autora",
-            year: "1900",
+            year: 1900,
             genre: "Novela",
             description: ""
         )
@@ -262,7 +262,7 @@ final class OpenLibraryServiceTests: XCTestCase {
         store.toggleFavorite(book)
 
         store.catalogState = .error(
-            .connectivity(.notConnectedToInternet)
+            .connectivity
         )
 
         XCTAssertTrue(store.books.isEmpty)
@@ -296,7 +296,7 @@ final class OpenLibraryServiceTests: XCTestCase {
             id: "/works/OL1W",
             title: "Libro de prueba",
             author: "Autora",
-            year: "1900",
+            year: 1900,
             genre: "Novela",
             description: ""
         )
@@ -311,7 +311,7 @@ final class OpenLibraryServiceTests: XCTestCase {
         await viewModel.loadBooks()
         XCTAssertEqual(
             store.catalogState,
-            .error(.connectivity(.notConnectedToInternet))
+            .error(.connectivity)
         )
 
         await viewModel.retry()
