@@ -7,6 +7,8 @@ struct SearchField: View {
 
     var body: some View {
         TextField("Buscar libro", text: $text)
+            // El teclado muestra "Buscar" en lugar de "Intro".
+            .submitLabel(.search)
             .padding(10)
             .background(Color.gray.opacity(0.2))
             .cornerRadius(8)
