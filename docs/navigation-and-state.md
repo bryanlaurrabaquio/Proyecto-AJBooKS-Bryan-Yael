@@ -1,4 +1,4 @@
-# Navegación y organización del estado: AJBooks
+# Navegación y organización del estado: BYbooKS
 
 **Integrantes**
 
@@ -9,7 +9,7 @@
 
 ## 0. Resumen del MVP
 
-AJBooks es una app para descubrir libros en tendencia, buscarlos por título y ver su detalle. Además, el usuario puede guardar los libros que le interesan y también quitarlos de su lista de favoritos.
+BYbooKS es una app para descubrir libros en tendencia, buscarlos por título y ver su detalle. Además, el usuario puede guardar los libros que le interesan y también quitarlos de su lista de favoritos.
 
 **Flujo principal:** abrir la app → ver la lista de libros → buscar (opcional) → entrar al detalle → guardar como favorito → consultar favoritos.
 
