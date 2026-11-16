@@ -3,18 +3,26 @@ import SwiftUI
 // Pantalla 2: Detalle del libro.
 // La vista solo muestra y avisa del toque; el estado "guardado" lo maneja BookDetailViewModel.
 struct SecondView: View {
-    var viewModel: BookDetailViewModel
+    @State var viewModel: BookDetailViewModel
+
+    init(viewModel: BookDetailViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
-                    Image(systemName: "book.closed")
-                        .font(.system(size: 50))
-                        .frame(width: 120, height: 170)
-                        .background(Color.gray.opacity(0.3))
-                        .cornerRadius(10)
-                        .accessibilityLabel("Portada de " + viewModel.book.title)
+                    AsyncImage(url: viewModel.book.coverURL(size: "L")) { image in
+                        image.resizable().scaledToFill()
+                    } placeholder: {
+                        Image(systemName: "book.closed")
+                            .font(.system(size: 50))
+                    }
+                    .frame(width: 120, height: 170)
+                    .background(Color.gray.opacity(0.3))
+                    .cornerRadius(10)
+                    .accessibilityLabel("Portada de " + viewModel.book.title)
 
                     VStack(alignment: .leading, spacing: 8) {
                         Text(viewModel.book.title)
@@ -54,6 +62,9 @@ struct SecondView: View {
             .padding()
         }
         .navigationTitle("Detalle")
+        .task {
+            await viewModel.loadDescription()
+        }
     }
 }
 
