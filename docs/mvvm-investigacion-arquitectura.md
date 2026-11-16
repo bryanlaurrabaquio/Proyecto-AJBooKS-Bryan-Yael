@@ -1,5 +1,7 @@
 # Investigación: separación de responsabilidades con MVVM — BYbooKS
 
+> **Actualizado en la Práctica 8.** Esta investigación se hizo antes de refactorizar a MVVM. Las secciones 3 y 4 conservan el análisis original, pero ahora indican cómo quedó la implementación; la sección 5 marca las dudas ya resueltas. Detalles técnicos de la versión final en [`documentacion-tecnica.md`](documentacion-tecnica.md).
+
 **Integrantes:** 
 
 · Yael Alam González Prospero 
@@ -57,13 +59,13 @@ La vista observa al ViewModel; cuando cambia su estado, SwiftUI vuelve a dibujar
 
 En el patrón MVVM, el ViewModel se encarga de la lógica de presentación y de pasar a la vista los datos del Model ya preparados. Con la macro `@Observable`, SwiftUI actualiza las vistas que leen esos datos cuando cambian.
 
-## 3. Análisis del proyecto actual
+## 3. Análisis del proyecto (antes de la refactorización)
 
-### Qué hay hoy
+### Qué había antes
 
-Hoy todos los archivos están juntos en la misma carpeta del proyecto. No se han separado en carpetas por rol todavía, esa organización forma parte de la propuesta e investigación y se haría en la etapa de implementación.
+Al hacer esta investigación, todos los archivos estaban juntos en la misma carpeta del proyecto. La separación en carpetas por rol era parte de la propuesta y **ya se implementó** (`Models/`, `Services/`, `ViewModels/`, `Views/`).
 
-| Archivo | Rol actual |
+| Archivo | Rol antes de refactorizar |
 |---|---|
 | `Book.swift` | Datos de un libro |
 | `BookStore.swift` | **Estado compartido**: lista de libros + favoritos (mezcla datos y reglas) |
@@ -72,11 +74,11 @@ Hoy todos los archivos están juntos en la misma carpeta del proyecto. No se han
 | `FavoritesView.swift` | Vista de Favoritos |
 | `BookRow.swift`, `SearchField.swift` | Subvistas reutilizables (solo UI) |
 
-### Lógica que debería salir de las vistas
+### Lógica que debía salir de las vistas
 
 El criterio que usamos es este: si algo es una decisión o una regla sobre los datos, debe salir de la vista y si solo describe cómo se dibuja algo en pantalla, se queda en la vista.
 
-| Lógica | Dónde está hoy | A dónde debería ir | Por qué debería salir |
+| Lógica | Dónde estaba | A dónde debía ir | Por qué debía salir |
 |---|---|---|---|
 | Filtrar libros según `searchText` (`filteredBooks`) | `ContentView` | ViewModel de Inicio | Es una regla sobre los datos, no una forma de dibujar, en el ViewModel se puede probar sin abrir la pantalla y la vista solo recibe la lista ya filtrada. |
 | Decidir si hay que mostrar “no se encontraron libros” | `ContentView` | ViewModel de Inicio (propiedad como `noResults`) | Depende del resultado del filtro, si el ViewModel ya lo calcula, la vista solo muestra u oculta el texto y no repite la cuenta. |
@@ -108,7 +110,7 @@ Lo que se queda en la vista: layout (`VStack`, `HStack`, `frame`), colores, modi
 
 ### Estructura de carpetas
 
-Esta estructura es la propuesta de la arquitectura para la siguiente etapa:
+Esta fue la estructura propuesta. **Ya está implementada**; en la versión final se agregaron además `Services/` y los modelos de la API (ver [`mvvm-refactorizacion.md`](mvvm-refactorizacion.md)):
 
 ```
 Proyecto Bry y Yael/
@@ -136,16 +138,16 @@ Proyecto Bry y Yael/
 
 ### Qué pasa con `BookStore`
 
-`BookStore` se mantiene como la fuente única de verdad (Single Source of Truth), los tres ViewModels reciben el mismo `BookStore` y leen/modifican datos a través de él, así se evita que cada ViewModel tenga su propia copia de los favoritos y se desincronicen. La documentación de Apple indica que un objeto de datos observable puede crearse una sola vez en la `App` de nivel superior para usarlo en toda la aplicación, que es justo lo que hace hoy el proyecto.
+`BookStore` se mantiene como la fuente única de verdad (Single Source of Truth), los tres ViewModels reciben el mismo `BookStore` y leen/modifican datos a través de él, así se evita que cada ViewModel tenga su propia copia de los favoritos y se desincronicen. La documentación de Apple indica que un objeto de datos observable puede crearse una sola vez en la `App` de nivel superior para usarlo en toda la aplicación, que es justo lo que hace el proyecto.
 
 
-## 5. Dudas y cosas por resolver antes de implementar
+## 5. Dudas que había antes de implementar y cómo se resolvieron
 
-1. **Cómo crear el ViewModel con el `BookStore` del `@Environment`**: el `@Environment` no está disponible en el `init` de la vista, hay que decidir si el ViewModel se crea en la raíz o se le pasa el store después.
-2. **`@Bindable`** pasa a ser necesario para enlazar `searchText` del ViewModel con el `TextField` (en el MVP actual no hacía falta).
-3. **¿Un ViewModel por pantalla o uno solo?** Se propone uno por pantalla para que cada uno tenga pocas responsabilidades.
-4. **Persistencia** (favoritos al cerrar la app) sigue fuera de alcance.
-5. **¿`BookStore` es parte del Model o es un ViewModel?** En esta propuesta se queda en la capa Model porque guarda los datos y sus reglas básicas y lo comparten varias pantallas; los ViewModels lo usan para preparar lo que cada vista necesita, pero es una decisión que conviene confirmar al implementar.
+1. **Cómo crear el ViewModel con el `BookStore` del `@Environment`**: el `@Environment` no está disponible en el `init` de la vista, hay que decidir si el ViewModel se crea en la raíz o se le pasa el store después. **Resuelto:** el `BookStore` se crea una vez en la `App` y se entrega por `init` a los ViewModels.
+2. **`@Bindable`** pasa a ser necesario para enlazar `searchText` del ViewModel con el `TextField` (en el MVP inicial no hacía falta). **Resuelto:** `ContentView` lo usa con `@Bindable`.
+3. **¿Un ViewModel por pantalla o uno solo?** Se propone uno por pantalla para que cada uno tenga pocas responsabilidades. **Resuelto:** hay un ViewModel por pantalla.
+4. **Persistencia** (favoritos al cerrar la app) estaba fuera de alcance. **Resuelto:** los favoritos se guardan con SwiftData.
+5. **¿`BookStore` es parte del Model o es un ViewModel?** En esta propuesta se queda en la capa Model porque guarda los datos y sus reglas básicas y lo comparten varias pantallas; los ViewModels lo usan para preparar lo que cada vista necesita, pero es una decisión que conviene confirmar al implementar. **Resuelto:** se quedó en la capa Model; guarda el catálogo remoto (`LoadState`) y los favoritos, y los ViewModels lo usan.
 
 ## 6. Ventajas esperadas
 
