@@ -1,32 +1,49 @@
 import SwiftUI
 
 // Pantalla 3: Favoritos.
-// La lista y el "está vacía" los prepara FavoritesViewModel.
+// La lista, el "está vacía" y las descripciones los prepara FavoritesViewModel.
 struct FavoritesView: View {
     var viewModel: FavoritesViewModel
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 10) {
+            LazyVStack(alignment: .leading, spacing: Metrics.cardSpacing) {
                 if viewModel.isEmpty {
-                    Text("Aún no tienes libros favoritos")
-                        .foregroundColor(.gray)
-                        .padding(.top, 40)
+                    StatusMessageView(
+                        systemImage: "heart",
+                        title: "Aún no tienes libros favoritos",
+                        message: "Toca el corazón de cualquier libro para guardarlo aquí. Tus favoritos se conservan aunque cierres la app."
+                    )
+                    .padding(.top, 24)
                 }
 
                 ForEach(viewModel.favorites) { book in
                     // Reutiliza el mismo navigationDestination definido en Inicio.
-                    NavigationLink(value: book) {
-                        BookRow(book: book)
+                    BookRow(
+                        book: book,
+                        descriptionPreview: viewModel.descriptionPreview(for: book),
+                        isFavorite: viewModel.isFavorite(book),
+                        onToggleFavorite: {
+                            withAnimation {
+                                viewModel.removeFavorite(book)
+                            }
+                        }
+                    )
+                    .onAppear {
+                        viewModel.prefetchDescription(for: book)
                     }
                 }
             }
-            .padding()
+            .padding(Metrics.screenPadding)
+            .frame(maxWidth: Metrics.maxContentWidth)
+            .frame(maxWidth: .infinity)
         }
+        .background(Palette.paper.ignoresSafeArea())
         .navigationTitle("Favoritos")
     }
 }
 
+#if DEBUG
 #Preview {
     // Store en memoria con un par de favoritos de ejemplo.
     NavigationStack {
@@ -36,5 +53,11 @@ struct FavoritesView: View {
             )
         )
     }
-    .preferredColorScheme(.dark)
 }
+
+#Preview("Vacío") {
+    NavigationStack {
+        FavoritesView(viewModel: FavoritesViewModel(store: .preview()))
+    }
+}
+#endif

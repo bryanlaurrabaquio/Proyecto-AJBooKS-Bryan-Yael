@@ -11,7 +11,8 @@ struct ContentView: View {
     let store: BookStore
 
     // El servicio se puede sustituir (por ejemplo, en la vista previa) sin tocar la red.
-    init(store: BookStore, service: any BookServicing = OpenLibraryService()) {
+    // Si no se indica, el ViewModel usa Open Library.
+    init(store: BookStore, service: (any BookServicing)? = nil) {
         self.store = store
         _viewModel = State(initialValue: BookListViewModel(store: store, service: service))
     }
@@ -21,35 +22,25 @@ struct ContentView: View {
         @Bindable var viewModel = viewModel
 
         NavigationStack {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("AJBooks")
-                        .font(.largeTitle)
-                        .bold()
-                        .foregroundColor(.red)
-
-                    Spacer()
-
-                    // Acceso a Favoritos, con el contador que prepara el ViewModel.
-                    NavigationLink(destination: FavoritesView(viewModel: FavoritesViewModel(store: store))) {
-                        HStack {
-                            Image(systemName: "heart.fill")
-                            Text(String(viewModel.favoritesCount))
-                        }
-                        .foregroundColor(.red)
-                    }
-                    .accessibilityLabel("Ver favoritos")
-                }
-
-                Text("Libros en tendencia")
-                    .foregroundColor(.gray)
+            VStack(alignment: .leading, spacing: 14) {
+                header
+                    .padding(.horizontal, Metrics.screenPadding)
 
                 // La subvista recibe el texto con @Binding (no tiene copia propia).
                 SearchField(text: $viewModel.searchText)
+                    .padding(.horizontal, Metrics.screenPadding)
 
                 catalog
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
-            .padding()
+            .padding(.top, 8)
+            .frame(maxWidth: Metrics.maxContentWidth)
+            .frame(maxWidth: .infinity)
+            .background(Palette.paper.ignoresSafeArea())
+            // El encabezado propio sustituye a la barra de navegación en Inicio.
+            // El título se usa como texto del botón "atrás" en las otras pantallas.
+            .navigationTitle("Inicio")
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: Book.self) { book in
                 SecondView(viewModel: BookDetailViewModel(book: book, store: store))
             }
@@ -59,7 +50,41 @@ struct ContentView: View {
                 await viewModel.loadIfNeeded()
             }
         }
+        .tint(Palette.accent)
     }
+
+    // MARK: - Encabezado
+
+    private var header: some View {
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("BYbooKS")
+                    .font(.system(.largeTitle, design: .serif, weight: .bold))
+                    .foregroundStyle(Palette.accent)
+                    .accessibilityAddTraits(.isHeader)
+
+                Text("Clásicos universales en ediciones en español")
+                    .font(.subheadline)
+                    .foregroundStyle(Palette.inkSecondary)
+            }
+
+            Spacer(minLength: 0)
+
+            // Acceso a Favoritos, con el contador que prepara el ViewModel.
+            NavigationLink(destination: FavoritesView(viewModel: FavoritesViewModel(store: store))) {
+                Label(String(viewModel.favoritesCount), systemImage: "heart.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Palette.onAccent)
+                    .padding(.horizontal, 14)
+                    .frame(minHeight: 44)
+                    .background(Capsule().fill(Palette.accent))
+            }
+            .accessibilityLabel(viewModel.favoritesAccessibilityLabel)
+            .accessibilityIdentifier("botonFavoritos")
+        }
+    }
+
+    // MARK: - Catálogo
 
     // Un case por cada estado de la solicitud (LoadState).
     @ViewBuilder
@@ -68,72 +93,98 @@ struct ContentView: View {
 
         // Loading: indicador mientras se hace la solicitud.
         case .idle, .loading:
-            ProgressView("Cargando libros…")
-                .frame(maxWidth: .infinity)
-                .padding(.top, 40)
+            VStack(spacing: 12) {
+                ProgressView()
+                    .controlSize(.large)
+                    .tint(Palette.accent)
+                Text("Cargando libros…")
+                    .font(.body)
+                    .foregroundStyle(Palette.inkSecondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 48)
+            .accessibilityElement(children: .combine)
 
         // Error: se comunica el problema y se ofrece reintentar.
         case .error(let error):
-            VStack(spacing: 12) {
-                Image(systemName: "exclamationmark.triangle")
-                    .font(.largeTitle)
-                    .foregroundColor(.red)
-
-                Text(error.localizedDescription)
-                    .multilineTextAlignment(.center)
-
-                Button("Reintentar") {
+            StatusMessageView(
+                systemImage: error == .connectivity ? "wifi.exclamationmark" : "exclamationmark.triangle",
+                title: error.localizedDescription,
+                message: error.recoverySuggestion,
+                tint: Palette.error,
+                actionTitle: "Reintentar",
+                action: {
                     Task {
                         await viewModel.retry()
                     }
                 }
-                .buttonStyle(.borderedProminent)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.top, 40)
+            )
 
         // Empty: la consulta funcionó, pero no hay libros para mostrar.
         case .empty:
-            VStack(spacing: 12) {
-                Text("La consulta fue correcta, pero no hay libros para mostrar.")
-                    .foregroundColor(.gray)
-                    .multilineTextAlignment(.center)
-
-                Button("Volver a consultar") {
+            StatusMessageView(
+                systemImage: "books.vertical",
+                title: "No hay libros para mostrar",
+                message: "La consulta fue correcta, pero Open Library no devolvió resultados.",
+                actionTitle: "Volver a consultar",
+                action: {
                     Task {
                         await viewModel.retry()
                     }
                 }
-                .buttonStyle(.bordered)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.top, 40)
+            )
 
         // Content: libros obtenidos del servicio remoto.
         case .content:
             if viewModel.noResults {
-                Text("No se encontraron libros para " + viewModel.searchText)
-                    .foregroundColor(.gray)
-                    .padding(.top)
+                StatusMessageView(
+                    systemImage: "magnifyingglass",
+                    title: viewModel.noResultsMessage,
+                    message: "Prueba con otro título o autor."
+                )
             } else {
-                // List solo crea las filas que se ven en pantalla, así que aguanta muchos libros.
-                List(viewModel.filteredBooks) { book in
-                    // Navegación basada en datos: se envía el libro elegido.
-                    NavigationLink(value: book) {
-                        BookRow(book: book)
-                    }
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
-                }
-                .listStyle(.plain)
+                bookList
             }
         }
     }
+
+    private var bookList: some View {
+        ScrollView {
+            // LazyVStack solo crea las tarjetas que se ven en pantalla, así que aguanta muchos libros.
+            LazyVStack(alignment: .leading, spacing: Metrics.cardSpacing) {
+                Text(viewModel.resultsSummary)
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(Palette.inkSecondary)
+
+                ForEach(viewModel.filteredBooks) { book in
+                    // Navegación basada en datos: la tarjeta envía el libro elegido.
+                    BookRow(
+                        book: book,
+                        descriptionPreview: viewModel.descriptionPreview(for: book),
+                        isFavorite: viewModel.isFavorite(book),
+                        onToggleFavorite: { viewModel.toggleFavorite(book) }
+                    )
+                    // La descripción se pide cuando la tarjeta aparece (carga perezosa).
+                    .onAppear {
+                        viewModel.prefetchDescription(for: book)
+                    }
+                }
+            }
+            .padding(.horizontal, Metrics.screenPadding)
+            .padding(.bottom, 24)
+        }
+        .scrollDismissesKeyboard(.interactively)
+    }
 }
 
-// La vista previa usa un servicio falso con datos de ejemplo (Book+Samples.swift).
-#Preview {
-    ContentView(store: BookStore(), service: PreviewBookService())
+#if DEBUG
+// La vista previa usa servicios falsos con datos de ejemplo (Book+Samples.swift).
+#Preview("Claro") {
+    ContentView(store: .preview(), service: PreviewBookService())
+}
+
+#Preview("Oscuro") {
+    ContentView(store: .preview(), service: PreviewBookService())
         .preferredColorScheme(.dark)
 }
+#endif
