@@ -14,11 +14,19 @@ extension URLSession: HTTPClient {
 // Contrato de consulta de libros.
 protocol BookServicing {
     func fetchBooks(query: String) async throws -> [Book]
+    // offset = desde qué posición de los resultados se empieza a traer libros.
+    func fetchBooks(query: String, offset: Int) async throws -> [Book]
     func fetchDescription(workKey: String) async -> String
 }
 
 extension BookServicing {
     func fetchDescription(workKey: String) async -> String { "" }
+
+    // Valor por defecto: los servicios que no manejan offset (como los falsos de
+    // las pruebas y de la vista previa) simplemente lo ignoran.
+    func fetchBooks(query: String, offset: Int) async throws -> [Book] {
+        try await fetchBooks(query: query)
+    }
 }
 
 struct OpenLibraryService: BookServicing {
@@ -34,24 +42,31 @@ struct OpenLibraryService: BookServicing {
 
     init(
     client: any HTTPClient = URLSession.shared,
-    limit: Int = 20
+    limit: Int = 50
     ) {
         self.client = client
         self.limit = limit
     }
 
-    func makeRequest(query: String) throws -> URLRequest {
+    func makeRequest(query: String, offset: Int = 0) throws -> URLRequest {
         guard var components = URLComponents(
             string: Self.searchEndpoint
         ) else {
             throw BookServiceError.invalidURL
         }
 
-        components.queryItems = [
+        var items = [
             URLQueryItem(name: "q", value: query),
             URLQueryItem(name: "fields", value: Self.fields),
             URLQueryItem(name: "limit", value: String(limit))
         ]
+
+        // Solo se manda offset cuando se quiere saltar los primeros resultados.
+        if offset > 0 {
+            items.append(URLQueryItem(name: "offset", value: String(offset)))
+        }
+
+        components.queryItems = items
 
         guard let url = components.url else {
             throw BookServiceError.invalidURL
@@ -88,9 +103,13 @@ struct OpenLibraryService: BookServicing {
     }
 
     func fetchBooks(query: String) async throws -> [Book] {
+        try await fetchBooks(query: query, offset: 0)
+    }
+
+    func fetchBooks(query: String, offset: Int) async throws -> [Book] {
 
         // 1. Construir petición.
-        let request = try makeRequest(query: query)
+        let request = try makeRequest(query: query, offset: offset)
 
         // 2. Descargar datos reales.
         let data: Data
