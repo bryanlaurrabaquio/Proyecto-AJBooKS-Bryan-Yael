@@ -41,13 +41,27 @@ struct ContentView: View {
                     .accessibilityLabel("Ver favoritos")
                 }
 
-                Text("Libros en tendencia")
+                Text(viewModel.isShowingSearchResults ? "Resultados de Open Library" : "Libros en tendencia")
                     .foregroundColor(.gray)
 
                 // La subvista recibe el texto con @Binding (no tiene copia propia).
                 SearchField(text: $viewModel.searchText)
+                    // Al presionar "Buscar" se consulta toda la base de Open Library.
+                    .onSubmit {
+                        Task {
+                            await viewModel.search()
+                        }
+                    }
+                    // Si el usuario edita el texto, se vuelve a la lista de inicio.
+                    .onChange(of: viewModel.searchText) {
+                        viewModel.resetSearch()
+                    }
 
-                catalog
+                if viewModel.isShowingSearchResults {
+                    searchResults
+                } else {
+                    catalog
+                }
             }
             .padding()
             .navigationDestination(for: Book.self) { book in
@@ -112,23 +126,73 @@ struct ContentView: View {
         // Content: libros obtenidos del servicio remoto.
         case .content:
             if viewModel.noResults {
-                Text("No se encontraron libros para " + viewModel.searchText)
+                Text("No se encontraron libros para " + viewModel.searchText + " en esta lista. Presiona Buscar para buscar en Open Library.")
                     .foregroundColor(.gray)
                     .padding(.top)
             } else {
-                // List solo crea las filas que se ven en pantalla, así que aguanta muchos libros.
-                List(viewModel.filteredBooks) { book in
-                    // Navegación basada en datos: se envía el libro elegido.
-                    NavigationLink(value: book) {
-                        BookRow(book: book)
+                bookList(viewModel.filteredBooks)
+                    // Al jalar hacia abajo se cambian los 10 libros por otros al azar.
+                    .refreshable {
+                        await viewModel.refreshRandomBooks()
                     }
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
-                }
-                .listStyle(.plain)
             }
         }
+    }
+
+    // Resultados de buscar en toda la base de Open Library (mismos estados que el catálogo).
+    @ViewBuilder
+    private var searchResults: some View {
+        switch viewModel.searchState {
+
+        case .idle, .loading:
+            ProgressView("Buscando en Open Library…")
+                .frame(maxWidth: .infinity)
+                .padding(.top, 40)
+
+        case .error(let error):
+            VStack(spacing: 12) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.largeTitle)
+                    .foregroundColor(.red)
+
+                Text(error.localizedDescription)
+                    .multilineTextAlignment(.center)
+
+                Button("Reintentar") {
+                    Task {
+                        await viewModel.search()
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 40)
+
+        case .empty:
+            Text("Open Library no encontró libros para " + viewModel.searchText)
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 40)
+
+        case .content(let books):
+            bookList(books)
+        }
+    }
+
+    // Lista de libros que se usa en el catálogo y en los resultados de búsqueda.
+    // List solo crea las filas que se ven en pantalla, así que aguanta muchos libros.
+    private func bookList(_ books: [Book]) -> some View {
+        List(books) { book in
+            // Navegación basada en datos: se envía el libro elegido.
+            NavigationLink(value: book) {
+                BookRow(book: book)
+            }
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
+        }
+        .listStyle(.plain)
     }
 }
 
