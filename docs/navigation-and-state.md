@@ -1,4 +1,6 @@
-# Navegación y organización del estado: AJBooks
+# Navegación y organización del estado: BYbooKS
+
+> **Documento histórico — práctica de navegación y estado (MVP con datos locales).** Describe el estado del proyecto en esa entrega, cuando la app se llamaba *AJBooks*. El nombre se actualizó a **BYbooKS**; para el estado actual consulta el [README](../README.md) y [ARCHITECTURE.md](ARCHITECTURE.md).
 
 **Integrantes**
 
@@ -9,7 +11,7 @@
 
 ## 0. Resumen del MVP
 
-AJBooks es una app para descubrir libros en tendencia, buscarlos por título y ver su detalle. Además, el usuario puede guardar los libros que le interesan y también quitarlos de su lista de favoritos.
+BYbooKS es una app para descubrir libros en tendencia, buscarlos por título y ver su detalle. Además, el usuario puede guardar los libros que le interesan y también quitarlos de su lista de favoritos.
 
 **Flujo principal:** abrir la app → ver la lista de libros → buscar (opcional) → entrar al detalle → guardar como favorito → consultar favoritos.
 

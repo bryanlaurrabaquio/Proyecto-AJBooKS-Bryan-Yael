@@ -1,4 +1,6 @@
-# Investigación: separación de responsabilidades con MVVM — AJBooks
+# Investigación: separación de responsabilidades con MVVM — BYbooKS
+
+> **Documento histórico — investigación previa a la refactorización MVVM.** Describe el estado del proyecto en esa entrega, cuando la app se llamaba *AJBooks*. El nombre se actualizó a **BYbooKS**; para el estado actual consulta el [README](../README.md) y [ARCHITECTURE.md](ARCHITECTURE.md).
 
 **Integrantes:** 
 
@@ -9,13 +11,13 @@
 
 ## 1. ¿Por qué conviene separar responsabilidades?
 
-Como no sabemos si le vamos a agregar mas pantallas o lógica a AJBooks (tiene solo tres pantallas), cada pantalla nueva agrega más reglas: filtros, mensajes, estados, si todo vive dentro de las vistas, cada cambio obliga a leer y tocar mucho código mezclado y el separar responsabilidades significa que cada parte del código va a tener un solo trabajo, esto hace que cada pantalla de la app pueda leer, cambiar y probar sin afectar a las demás.
+Como no sabemos si le vamos a agregar mas pantallas o lógica a BYbooKS (tiene solo tres pantallas), cada pantalla nueva agrega más reglas: filtros, mensajes, estados, si todo vive dentro de las vistas, cada cambio obliga a leer y tocar mucho código mezclado y el separar responsabilidades significa que cada parte del código va a tener un solo trabajo, esto hace que cada pantalla de la app pueda leer, cambiar y probar sin afectar a las demás.
 
-Las vistas de la app de AJBooks hacen dos trabajos a la vez: dibujar la interfaz y decidir qué datos mostrar, por ejemplo, `ContentView` filtra los libros y decide cuándo mostrar el mensaje de "no se encontraron libros", y `SecondView` decide el texto del botón según el estado de "guardado".
+Las vistas de la app de BYbooKS hacen dos trabajos a la vez: dibujar la interfaz y decidir qué datos mostrar, por ejemplo, `ContentView` filtra los libros y decide cuándo mostrar el mensaje de "no se encontraron libros", y `SecondView` decide el texto del botón según el estado de "guardado".
 
 ### 1.1 Diferencia entre código de interfaz, de datos y de lógica
 
-| Tipo de código | Qué es | Ejemplos en AJBooks |
+| Tipo de código | Qué es | Ejemplos en BYbooKS |
 |---|---|---|
 | **Interfaz** | Cómo se ve la pantalla y cómo responde al toque | `VStack`, `Text`, `Button`, colores, `NavigationLink`, `frame` |
 | **Datos** | La información de la app y su forma | `struct Book`, la lista `books`, `favoriteIDs` |

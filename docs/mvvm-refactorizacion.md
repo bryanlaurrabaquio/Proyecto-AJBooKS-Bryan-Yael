@@ -1,4 +1,6 @@
-# Refactorización a MVVM — AJBooks (Práctica 5)
+# Refactorización a MVVM — BYbooKS (Práctica 5)
+
+> **Documento histórico — Práctica 5 (refactorización a MVVM).** Describe el estado del proyecto en esa entrega, cuando la app se llamaba *AJBooks*. El nombre se actualizó a **BYbooKS**; para el estado actual consulta el [README](../README.md) y [ARCHITECTURE.md](ARCHITECTURE.md).
 
 **Integrantes:** Yael Alam González Prospero · Bryan Ricardo Laurrabaquio Ramirez
 
