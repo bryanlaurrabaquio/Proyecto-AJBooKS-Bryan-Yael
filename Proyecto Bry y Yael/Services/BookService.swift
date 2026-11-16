@@ -84,7 +84,7 @@ struct OpenLibraryService: BookServicing {
             forHTTPHeaderField: "Accept"
         )
         request.setValue(
-            "AJBooks/1.0 (proyecto educativo)",
+            "BYbooKS/1.0 (proyecto educativo)",
             forHTTPHeaderField: "User-Agent"
         )
 
