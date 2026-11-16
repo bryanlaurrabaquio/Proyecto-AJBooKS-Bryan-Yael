@@ -4,6 +4,9 @@
 //
 //  Created by Facultad de Contaduría y Administración on 24/09/26.
 //
+//  Captura de la pantalla de arranque de BYbooKS en cada configuración
+//  (modo claro/oscuro, orientación) que ejecute Xcode.
+//
 
 import XCTest
 
@@ -22,18 +25,10 @@ final class Proyecto_Bry_y_YaelUITestsLaunchTests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
 
-        // Insert steps here to perform after app launch but before taking a screenshot,
-        // such as logging into a test account or navigating somewhere in the app
-        // XCUIAutomation Documentation
-        // https://developer.apple.com/documentation/xcuiautomation
-
+        // La captura queda adjunta al resultado de la prueba en Xcode (Report navigator).
         let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = "Launch Screen"
+        attachment.name = "Pantalla de inicio"
         attachment.lifetime = .keepAlways
         add(attachment)
     }
-    
-    
-    
 }
-

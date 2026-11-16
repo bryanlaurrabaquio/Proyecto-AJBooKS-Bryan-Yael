@@ -113,6 +113,21 @@ final class FavoritesServiceTests: XCTestCase {
         XCTAssertEqual(saved[0].bookID, pedroParamo.id)
     }
 
+    // BYbooKS: la portada y la edición se guardan para mostrarlas en Favoritos sin conexión a la búsqueda.
+    func testFavoriteKeepsCoverAndEditionAfterSaving() throws {
+        // Arrange
+        let service = FavoritesService(context: try makeContext())
+        let conPortada = Book(id: "/works/OL1W", title: "El castillo", author: "Franz Kafka", year: 1926, genre: "Ficción", description: "", coverID: 222, editionKey: "/books/OL9M")
+
+        // Act
+        service.saveFavorite(book: conPortada)
+
+        // Assert
+        let restored = try XCTUnwrap(service.fetchFavorites()?.first).toBook()
+        XCTAssertEqual(restored.coverID, 222)
+        XCTAssertEqual(restored.editionKey, "/books/OL9M")
+    }
+
     // El favorito se reconoce por el id de la fuente, no por el título:
     // dos libros con el mismo título pero distinto id son favoritos distintos.
     func testBooksWithSameTitleButDifferentIDAreDifferentFavorites() throws {

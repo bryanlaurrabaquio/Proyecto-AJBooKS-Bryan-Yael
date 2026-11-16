@@ -4,41 +4,46 @@
 //
 //  Created by Facultad de Contaduría y Administración on 24/09/26.
 //
+//  Pruebas de interfaz de BYbooKS.
+//
+//  No dependen de la red: solo comprueban elementos que se dibujan al abrir la app
+//  (el catálogo se carga de Open Library y puede tardar o fallar sin conexión).
+//
 
 import XCTest
 
 final class Proyecto_Bry_y_YaelUITests: XCTestCase {
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
+        // En las pruebas de interfaz conviene detenerse en el primer fallo.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testPantallaInicialMuestraMarcaBuscadorYFavoritos() throws {
         let app = XCUIApplication()
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // XCUIAutomation Documentation
-        // https://developer.apple.com/documentation/xcuiautomation
+        XCTAssertTrue(app.staticTexts["BYbooKS"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.textFields["campoBusqueda"].exists)
+        XCTAssertTrue(app.buttons["botonFavoritos"].exists)
     }
-    
-    
-    
+
+    @MainActor
+    func testFavoritosSeAbreDesdeInicio() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        let favoritos = app.buttons["botonFavoritos"]
+        XCTAssertTrue(favoritos.waitForExistence(timeout: 5))
+        favoritos.tap()
+
+        XCTAssertTrue(app.navigationBars["Favoritos"].waitForExistence(timeout: 5))
+    }
 
     @MainActor
     func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
+        // Mide cuánto tarda en abrir la aplicación.
         measure(metrics: [XCTApplicationLaunchMetric()]) {
             XCUIApplication().launch()
         }
