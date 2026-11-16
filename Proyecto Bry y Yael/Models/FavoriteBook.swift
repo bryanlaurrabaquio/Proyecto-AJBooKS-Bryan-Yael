@@ -9,19 +9,22 @@ class FavoriteBook {
     var author: String
     var year: String = ""
     var genre: String = ""
+    var coverID: Int?
 
     init(
     bookID: String,
     title: String,
     author: String,
     year: String = "",
-    genre: String = ""
+    genre: String = "",
+    coverID: Int? = nil
     ) {
         self.bookID = bookID
         self.title = title
         self.author = author
         self.year = year
         self.genre = genre
+        self.coverID = coverID
     }
 }
 
@@ -34,7 +37,8 @@ extension FavoriteBook {
             title: book.title,
             author: book.author,
             year: book.year.map { String($0) } ?? "",
-            genre: book.genre ?? ""
+            genre: book.genre ?? "",
+            coverID: book.coverID
         )
     }
 
@@ -46,7 +50,8 @@ extension FavoriteBook {
             author: author,
             year: Int(year),
             genre: genre.isEmpty ? nil : genre,
-            description: ""
+            description: "",
+            coverID: coverID
         )
     }
 }
