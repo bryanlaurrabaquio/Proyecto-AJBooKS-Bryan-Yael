@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Xcode: datos personales del usuario y resultados de compilación
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+DerivedData/
+build/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Configuración local de IDE de JetBrains (rutas propias de cada equipo)
+.idea/
