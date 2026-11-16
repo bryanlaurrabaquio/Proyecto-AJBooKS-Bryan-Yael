@@ -6,12 +6,16 @@ struct BookRow: View {
 
     var body: some View {
         HStack {
-            Image(systemName: "book.closed")
-                .font(.largeTitle)
-                .frame(width: 60, height: 80)
-                .background(Color.gray.opacity(0.3))
-                .cornerRadius(6)
-                .accessibilityLabel("Portada de " + book.title)
+            AsyncImage(url: book.coverURL()) { image in
+                image.resizable().scaledToFill()
+            } placeholder: {
+                Image(systemName: "book.closed")
+                    .font(.largeTitle)
+            }
+            .frame(width: 60, height: 80)
+            .background(Color.gray.opacity(0.3))
+            .cornerRadius(6)
+            .accessibilityLabel("Portada de " + book.title)
 
             VStack(alignment: .leading, spacing: 5) {
                 Text(book.title)
