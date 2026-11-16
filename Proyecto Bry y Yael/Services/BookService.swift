@@ -14,6 +14,11 @@ extension URLSession: HTTPClient {
 // Contrato de consulta de libros.
 protocol BookServicing {
     func fetchBooks(query: String) async throws -> [Book]
+    func fetchDescription(workKey: String) async -> String
+}
+
+extension BookServicing {
+    func fetchDescription(workKey: String) async -> String { "" }
 }
 
 struct OpenLibraryService: BookServicing {
@@ -22,7 +27,7 @@ struct OpenLibraryService: BookServicing {
     "https://openlibrary.org/search.json"
 
     static let fields =
-    "key,title,author_name,first_publish_year,subject"
+    "key,title,author_name,first_publish_year,subject,cover_i"
 
     private let client: any HTTPClient
     private let limit: Int
@@ -52,6 +57,10 @@ struct OpenLibraryService: BookServicing {
             throw BookServiceError.invalidURL
         }
 
+        return makeRequest(url: url)
+    }
+
+    private func makeRequest(url: URL) -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.timeoutInterval = 15
@@ -65,6 +74,17 @@ struct OpenLibraryService: BookServicing {
         )
 
         return request
+    }
+
+    func fetchDescription(workKey: String) async -> String {
+        guard let url = URL(string: "https://openlibrary.org\(workKey).json"),
+              let (data, _) = try? await client.send(makeRequest(url: url)),
+              let work = try? JSONDecoder().decode(OpenLibraryWork.self, from: data)
+        else {
+            return ""
+        }
+
+        return work.cleanDescription
     }
 
     func fetchBooks(query: String) async throws -> [Book] {
