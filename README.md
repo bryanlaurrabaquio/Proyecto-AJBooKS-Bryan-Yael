@@ -1,8 +1,8 @@
-# Proyecto-AJBooKS-Bryan-Yael
+# Proyecto-BYbooKS-Bryan-Yael
 Bryan Laurrabaquio Ramírez 
 Yael Gonzales
 Equipo 8 
-AJBooks — Gestor Personal de Libros
+BYbooKS — Gestor Personal de Libros
 Aplicación iOS que permite explorar, buscar y guardar libros usando la API pública de Open Library. Los libros favoritos se guardan localmente en el dispositivo con SwiftData, sin necesidad de crear una cuenta, y siguen disponibles aunque no haya conexión a internet.
 Tecnologías
 	•	SwiftUI — interfaz
