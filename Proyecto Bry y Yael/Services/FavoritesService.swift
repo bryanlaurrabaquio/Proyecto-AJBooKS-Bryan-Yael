@@ -88,6 +88,9 @@ class InMemoryFavoritesService: FavoritesServiceProtocol {
 
     private var saved: [FavoriteBook] = []
 
+    // nonisolated: permite usarlo como valor por defecto en el inicializador de BookStore.
+    nonisolated init() {}
+
     func fetchFavorites() -> [FavoriteBook]? {
         return saved
     }

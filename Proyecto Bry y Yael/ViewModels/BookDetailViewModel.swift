@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-// ViewModel de Detalle: trabaja con un solo libro y su estado de "guardado".
+// ViewModel de Detalle: trabaja con un solo libro, su estado de "guardado" y su descripción.
 @MainActor
 @Observable
 final class BookDetailViewModel {
@@ -12,6 +12,8 @@ final class BookDetailViewModel {
         self.book = book
         self.store = store
     }
+
+    // MARK: - Favorito
 
     // Se lee del BookStore, no se guarda una copia aquí.
     var isSaved: Bool {
@@ -33,13 +35,45 @@ final class BookDetailViewModel {
         return "Guardar en favoritos"
     }
 
-    var descriptionText: String {
-        if book.description.isEmpty {
-            return "Descripción no disponible."
-        }
-
-        return book.description
+    func toggleSaved() {
+        store.toggleFavorite(book)
     }
+
+    // MARK: - Descripción
+
+    var descriptionState: DescriptionState {
+        store.descriptionState(for: book)
+    }
+
+    var descriptionContent: DetailDescriptionContent {
+        descriptionState.detailContent
+    }
+
+    // Texto plano de la descripción (o el motivo por el que no hay).
+    var descriptionText: String {
+        switch descriptionContent {
+        case .text(let text):
+            return text
+        case .loading:
+            return "Cargando descripción…"
+        case .onlyInOtherLanguage(let language, _):
+            return "Open Library no tiene una descripción en español para este libro; solo está disponible en \(language)."
+        case .unavailable:
+            return "Descripción no disponible."
+        case .failed:
+            return "No se pudo cargar la descripción."
+        }
+    }
+
+    func loadDescription() async {
+        await store.loadDescription(for: book)
+    }
+
+    func retryDescription() async {
+        await store.reloadDescription(for: book)
+    }
+
+    // MARK: - Datos del libro
 
     // Textos para mostrar cuando la API no entregó el dato.
     var yearText: String {
@@ -50,8 +84,7 @@ final class BookDetailViewModel {
         book.genre ?? "Sin género"
     }
 
-    func toggleSaved() {
-        store.toggleFavorite(book)
+    var coverAccessibilityLabel: String {
+        "Portada de " + book.title
     }
-
 }
