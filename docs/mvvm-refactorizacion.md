@@ -1,4 +1,4 @@
-# Refactorización a MVVM — AJBooks (Práctica 5)
+# Refactorización a MVVM — BYbooKS (Práctica 5)
 
 **Integrantes:** Yael Alam González Prospero · Bryan Ricardo Laurrabaquio Ramirez
 

@@ -332,4 +332,75 @@ final class OpenLibraryServiceTests: XCTestCase {
 
         XCTAssertEqual(store.catalogState, .empty)
     }
+
+    // Buscar consulta a Open Library y muestra sus resultados.
+    func testBusquedaEnOpenLibraryMuestraResultados() async {
+        let book = Book(
+            id: "/works/OL2W",
+            title: "Libro encontrado",
+            author: "Autora",
+            year: 1950,
+            genre: "Novela",
+            description: ""
+        )
+
+        let viewModel = BookListViewModel(
+            store: BookStore(),
+            service: MockBookService(result: .success([book]))
+        )
+
+        viewModel.searchText = "encontrado"
+        await viewModel.search()
+
+        XCTAssertTrue(viewModel.isShowingSearchResults)
+        XCTAssertEqual(viewModel.searchState, .content([book]))
+    }
+
+    // Una búsqueda sin resultados no debe confundirse con un error.
+    func testBusquedaSinResultadosEnOpenLibrary() async {
+        let viewModel = BookListViewModel(
+            store: BookStore(),
+            service: MockBookService(result: .success([]))
+        )
+
+        viewModel.searchText = "zzzz"
+        await viewModel.search()
+
+        XCTAssertEqual(viewModel.searchState, .empty)
+    }
+
+    // Al editar el texto se vuelve a la lista de inicio.
+    func testEditarElTextoRegresaALaListaDeInicio() async {
+        let viewModel = BookListViewModel(
+            store: BookStore(),
+            service: MockBookService(result: .failure(BookServiceError.connectivity))
+        )
+
+        viewModel.searchText = "algo"
+        await viewModel.search()
+        XCTAssertEqual(viewModel.searchState, .error(.connectivity))
+
+        viewModel.resetSearch()
+
+        XCTAssertFalse(viewModel.isShowingSearchResults)
+    }
+
+    // El offset viaja en la URL para pedir libros desde una posición distinta.
+    func testPeticionIncluyeOffset() throws {
+        let request = try OpenLibraryService().makeRequest(
+            query: "subject:fantasy",
+            offset: 300
+        )
+
+        let url = try XCTUnwrap(request.url?.absoluteString)
+        XCTAssertTrue(url.contains("offset=300"))
+    }
+
+    // Sin offset la URL queda igual que antes.
+    func testPeticionSinOffsetNoLoMenciona() throws {
+        let request = try OpenLibraryService().makeRequest(query: "subject:fantasy")
+
+        let url = try XCTUnwrap(request.url?.absoluteString)
+        XCTAssertFalse(url.contains("offset"))
+    }
 }

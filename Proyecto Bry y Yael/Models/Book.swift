@@ -13,6 +13,7 @@ struct Book: Identifiable, Hashable {
     var year: Int?
     var genre: String?
     var description: String
+    var coverID: Int?
 }
 
 // Dato calculado del Model: el formato "año - género" se arma en un solo lugar,
@@ -22,5 +23,9 @@ extension Book {
     var subtitle: String? {
         let parts = [year.map { String($0) }, genre].compactMap { $0 }
         return parts.isEmpty ? nil : parts.joined(separator: " - ")
+    }
+
+    func coverURL(size: String = "M") -> URL? {
+        coverID.flatMap { URL(string: "https://covers.openlibrary.org/b/id/\($0)-\(size).jpg") }
     }
 }

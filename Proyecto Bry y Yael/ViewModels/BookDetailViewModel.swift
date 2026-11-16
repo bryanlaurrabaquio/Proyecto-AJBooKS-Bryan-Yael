@@ -6,11 +6,18 @@ import Observation
 @Observable
 final class BookDetailViewModel {
     private let store: BookStore
+    private let service: any BookServicing
     let book: Book
+    private(set) var loadedDescription: String?
 
-    init(book: Book, store: BookStore) {
+    init(
+    book: Book,
+    store: BookStore,
+    service: any BookServicing = OpenLibraryService()
+    ) {
         self.book = book
         self.store = store
+        self.service = service
     }
 
     // Se lee del BookStore, no se guarda una copia aquí.
@@ -34,11 +41,20 @@ final class BookDetailViewModel {
     }
 
     var descriptionText: String {
-        if book.description.isEmpty {
-            return "Descripción no disponible."
+        if !book.description.isEmpty {
+            return book.description
         }
 
-        return book.description
+        guard let loadedDescription else {
+            return "Cargando descripción…"
+        }
+
+        return loadedDescription.isEmpty ? "Descripción no disponible." : loadedDescription
+    }
+
+    func loadDescription() async {
+        guard book.description.isEmpty else { return }
+        loadedDescription = await service.fetchDescription(workKey: book.id)
     }
 
     // Textos para mostrar cuando la API no entregó el dato.

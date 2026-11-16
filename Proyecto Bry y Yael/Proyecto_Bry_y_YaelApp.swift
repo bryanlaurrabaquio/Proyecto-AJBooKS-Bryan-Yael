@@ -33,7 +33,10 @@ struct Proyecto_Bry_y_YaelApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(store: store)
-                .preferredColorScheme(.dark)
+                // Botones, enlaces y flecha de regreso en café (en vez del azul del sistema).
+                .tint(Color.appAccent)
+                // Siempre tema claro, para que la paleta se vea igual con el sistema en modo oscuro.
+                .preferredColorScheme(.light)
         }
     }
 }

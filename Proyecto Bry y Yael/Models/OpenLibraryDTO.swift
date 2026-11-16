@@ -11,6 +11,7 @@ struct OpenLibraryDocument: Decodable {
     let authorName: [String]?
     let firstPublishYear: Int?
     let subject: [String]?
+    let coverI: Int?
 
     func toBook() -> Book {
         let authors = (authorName ?? []).filter {
@@ -35,7 +36,32 @@ struct OpenLibraryDocument: Decodable {
             author: author,
             year: firstPublishYear,
             genre: genre,
-            description: ""
+            description: "",
+            coverID: coverI
         )
+    }
+}
+
+struct OpenLibraryWork: Decodable {
+    let description: OpenLibraryText?
+
+    var cleanDescription: String {
+        (description?.value ?? "")
+            .components(separatedBy: "----------")[0]
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+struct OpenLibraryText: Decodable {
+    let value: String
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        if let text = try? container.decode(String.self) {
+            value = text
+        } else {
+            value = try container.decode([String: String].self)["value"] ?? ""
+        }
     }
 }
