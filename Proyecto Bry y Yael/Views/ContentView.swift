@@ -23,10 +23,10 @@ struct ContentView: View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Text("AJBooks")
+                    Text("BYbooKS")
                         .font(.largeTitle)
                         .bold()
-                        .foregroundColor(.red)
+                        .foregroundColor(.appAccent)
 
                     Spacer()
 
@@ -36,13 +36,13 @@ struct ContentView: View {
                             Image(systemName: "heart.fill")
                             Text(String(viewModel.favoritesCount))
                         }
-                        .foregroundColor(.red)
+                        .foregroundColor(.appAccent)
                     }
                     .accessibilityLabel("Ver favoritos")
                 }
 
                 Text(viewModel.isShowingSearchResults ? "Resultados de Open Library" : "Libros en tendencia")
-                    .foregroundColor(.gray)
+                    .foregroundColor(.appMuted)
 
                 // La subvista recibe el texto con @Binding (no tiene copia propia).
                 SearchField(text: $viewModel.searchText)
@@ -64,6 +64,9 @@ struct ContentView: View {
                 }
             }
             .padding()
+            // Fondo crema también detrás de la barra de navegación.
+            .background(Color.appBackground.ignoresSafeArea())
+            .toolbarBackground(Color.appBackground, for: .navigationBar)
             .navigationDestination(for: Book.self) { book in
                 SecondView(viewModel: BookDetailViewModel(book: book, store: store))
             }
@@ -91,7 +94,7 @@ struct ContentView: View {
             VStack(spacing: 12) {
                 Image(systemName: "exclamationmark.triangle")
                     .font(.largeTitle)
-                    .foregroundColor(.red)
+                    .foregroundColor(.appAccent)
 
                 Text(error.localizedDescription)
                     .multilineTextAlignment(.center)
@@ -110,7 +113,7 @@ struct ContentView: View {
         case .empty:
             VStack(spacing: 12) {
                 Text("La consulta fue correcta, pero no hay libros para mostrar.")
-                    .foregroundColor(.gray)
+                    .foregroundColor(.appMuted)
                     .multilineTextAlignment(.center)
 
                 Button("Volver a consultar") {
@@ -127,7 +130,7 @@ struct ContentView: View {
         case .content:
             if viewModel.noResults {
                 Text("No se encontraron libros para " + viewModel.searchText + " en esta lista. Presiona Buscar para buscar en Open Library.")
-                    .foregroundColor(.gray)
+                    .foregroundColor(.appMuted)
                     .padding(.top)
             } else {
                 bookList(viewModel.filteredBooks)
@@ -153,7 +156,7 @@ struct ContentView: View {
             VStack(spacing: 12) {
                 Image(systemName: "exclamationmark.triangle")
                     .font(.largeTitle)
-                    .foregroundColor(.red)
+                    .foregroundColor(.appAccent)
 
                 Text(error.localizedDescription)
                     .multilineTextAlignment(.center)
@@ -170,7 +173,7 @@ struct ContentView: View {
 
         case .empty:
             Text("Open Library no encontró libros para " + viewModel.searchText)
-                .foregroundColor(.gray)
+                .foregroundColor(.appMuted)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 40)
@@ -193,11 +196,12 @@ struct ContentView: View {
             .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
         }
         .listStyle(.plain)
+        // Sin esto, la lista pinta su propio fondo y tapa el color crema.
+        .scrollContentBackground(.hidden)
     }
 }
 
 // La vista previa usa un servicio falso con datos de ejemplo (Book+Samples.swift).
 #Preview {
     ContentView(store: BookStore(), service: PreviewBookService())
-        .preferredColorScheme(.dark)
 }

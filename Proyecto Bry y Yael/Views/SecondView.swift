@@ -20,7 +20,7 @@ struct SecondView: View {
                             .font(.system(size: 50))
                     }
                     .frame(width: 120, height: 170)
-                    .background(Color.gray.opacity(0.3))
+                    .background(Color.appCover)
                     .cornerRadius(10)
                     .accessibilityLabel("Portada de " + viewModel.book.title)
 
@@ -30,7 +30,7 @@ struct SecondView: View {
                             .bold()
 
                         Text(viewModel.book.author)
-                            .foregroundColor(.gray)
+                            .foregroundColor(.appMuted)
                     }
                 }
 
@@ -43,7 +43,7 @@ struct SecondView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(viewModel.isSaved ? Color.red : Color.gray)
+                    .background(viewModel.isSaved ? Color.appAccent : Color.appInactive)
                     .foregroundColor(.white)
                     .cornerRadius(8)
                 }
@@ -53,14 +53,18 @@ struct SecondView: View {
                     .font(.headline)
 
                 Text(viewModel.descriptionText)
-                .foregroundColor(.gray)
+                .foregroundColor(.appMuted)
 
                 Text("Autor: " + viewModel.book.author)
                 Text("Año: " + viewModel.yearText)
                 Text("Género: " + viewModel.genreText)
             }
             .padding()
+            // Texto principal en café oscuro; los que tienen su propio color lo conservan.
+            .foregroundColor(.appText)
         }
+        .background(Color.appBackground.ignoresSafeArea())
+        .toolbarBackground(Color.appBackground, for: .navigationBar)
         .navigationTitle("Detalle")
         .task {
             await viewModel.loadDescription()
@@ -79,5 +83,4 @@ struct SecondView: View {
             )
         )
     }
-    .preferredColorScheme(.dark)
 }

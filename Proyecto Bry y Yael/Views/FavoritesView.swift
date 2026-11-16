@@ -10,7 +10,7 @@ struct FavoritesView: View {
             VStack(spacing: 10) {
                 if viewModel.isEmpty {
                     Text("Aún no tienes libros favoritos")
-                        .foregroundColor(.gray)
+                        .foregroundColor(.appMuted)
                         .padding(.top, 40)
                 }
 
@@ -23,6 +23,8 @@ struct FavoritesView: View {
             }
             .padding()
         }
+        .background(Color.appBackground.ignoresSafeArea())
+        .toolbarBackground(Color.appBackground, for: .navigationBar)
         .navigationTitle("Favoritos")
     }
 }
@@ -36,5 +38,4 @@ struct FavoritesView: View {
             )
         )
     }
-    .preferredColorScheme(.dark)
 }
