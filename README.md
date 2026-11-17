@@ -4,8 +4,8 @@ Aplicación iOS para descubrir libros, buscarlos en Open Library, ver su detalle
 
 **Equipo 8**
 
-- Yael Alam González Prospero
 - Bryan Ricardo Laurrabaquio Ramírez
+- Yael Alam González Prospero
 
 ---
 
