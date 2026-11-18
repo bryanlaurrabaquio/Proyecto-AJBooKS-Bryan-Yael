@@ -7,8 +7,8 @@
 | Dato | Valor |
 |---|---|
 | Rama | `Practica8DocumentacionFinal` |
-| Commit final | `<hash del commit>` |
-| Etiqueta (opcional) | `<v1.0>` |
+| Commit final | `41c8a55` |
+| Etiqueta (opcional) | `No aplica` |
 
 ## 2. Revisión del repositorio
 
