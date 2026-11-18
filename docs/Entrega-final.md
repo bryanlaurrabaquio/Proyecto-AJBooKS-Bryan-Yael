@@ -7,7 +7,7 @@
 | Dato | Valor |
 |---|---|
 | Rama | `Practica8DocumentacionFinal` |
-| Commit final | `41c8a55` |
+| Commit final | `b06256c` |
 | Etiqueta (opcional) | `No aplica` |
 
 ## 2. Revisión del repositorio
