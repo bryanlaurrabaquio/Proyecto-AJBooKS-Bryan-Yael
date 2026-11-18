@@ -49,8 +49,8 @@ Encontrar un libro y llevar el control de los que nos interesan suele implicar v
 1. Clonar el repositorio:
 
    ```bash
-   git clone <URL-del-repositorio>
-   cd <carpeta-del-repositorio>
+   git clone https://github.com/bryanlaurrabaquio/Proyecto-AJBooKS-Bryan-Yael.git
+   cd Proyecto-AJBooKS-Bryan-Yael-main
    ```
 
 2. Abrir `Proyecto Bry y Yael.xcodeproj` con Xcode.
