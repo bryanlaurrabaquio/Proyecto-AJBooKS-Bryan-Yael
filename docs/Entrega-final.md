@@ -6,7 +6,7 @@
 
 | Dato | Valor |
 |---|---|
-| Rama | `<rama>` |
+| Rama | `Practica8DocumentacionFinal` |
 | Commit final | `<hash del commit>` |
 | Etiqueta (opcional) | `<v1.0>` |
 
@@ -46,9 +46,9 @@ Marcar después de probarlas en el simulador.
 | Dato | Valor |
 |---|---|
 | Comando o forma de ejecución | ⌘U en Xcode (o `xcodebuild test`, ver README) |
-| Simulador / iOS | `<modelo y versión>` |
-| Pruebas unitarias | `<pasaron X de Y>` |
-| Fecha | `<fecha>` |
+| Simulador / iOS | `Iphone 17 - IOS 26.5` |
+| Pruebas unitarias | `pasaron 45 de 45 ` |
+| Fecha | `17 de noviembre del 2026` |
 
 Las pruebas unitarias son 30 de XCTest y 15 de Swift Testing; no usan la red real. Las pruebas de interfaz son solo la plantilla de Xcode.
 
