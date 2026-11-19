@@ -27,7 +27,7 @@ Proyecto Bry y Yael/
 │   ├── ContentView.swift
 │   ├── SecondView.swift
 │   ├── FavoritesView.swift
-│   └── Components/ (BookRow, SearchField)
+│   └── Components/ (BookRow, SearchField, Theme)
 └── Proyecto_Bry_y_YaelApp.swift
 ```
 
