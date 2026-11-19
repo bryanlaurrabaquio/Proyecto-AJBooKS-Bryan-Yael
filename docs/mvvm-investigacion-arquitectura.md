@@ -125,7 +125,7 @@ Proyecto Bry y Yael/
     ├── ContentView.swift
     ├── SecondView.swift
     ├── FavoritesView.swift
-    └── Components/ (BookRow, SearchField)
+    └── Components/ (BookRow, SearchField, Theme)
 ```
 
 ### Responsabilidad de cada ViewModel
