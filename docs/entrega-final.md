@@ -25,21 +25,19 @@
 
 ## 3. Funcionalidades del MVP verificadas
 
-Marcar después de probarlas en el simulador.
-
-- [ ] Al abrir la app se carga el catálogo de libros en tendencia
-- [ ] Jalar la lista hacia abajo cambia los libros por otros
-- [ ] Escribir en el campo filtra los libros descargados por título o autor
-- [ ] Presionar *Buscar* consulta Open Library y muestra los resultados
-- [ ] Buscar algo inexistente muestra el mensaje de "sin resultados"
-- [ ] Con el modo avión activado se muestra el error con *Reintentar*, y al reconectar funciona
-- [ ] Tocar un libro abre el detalle con portada, autor, año, género y descripción
-- [ ] *Guardar* marca el libro y el contador del corazón sube
-- [ ] El libro guardado aparece en Favoritos
-- [ ] Cerrar la app por completo y volver a abrirla conserva los favoritos
-- [ ] *Guardado* en el detalle quita el libro de Favoritos
-- [ ] Favoritos vacío muestra "Aún no tienes libros favoritos"
-- [ ] Con modo avión, Favoritos sigue mostrando los libros guardados
+- [x] Al abrir la app se carga el catálogo de libros en tendencia
+- [x] Jalar la lista hacia abajo cambia los libros por otros
+- [x] Escribir en el campo filtra los libros descargados por título o autor
+- [x] Presionar *Buscar* consulta Open Library y muestra los resultados
+- [x] Buscar algo inexistente muestra el mensaje de "sin resultados"
+- [x] Con el modo avión activado se muestra el error con *Reintentar*, y al reconectar funciona
+- [x] Tocar un libro abre el detalle con portada, autor, año, género y descripción
+- [x] *Guardar* marca el libro y el contador del corazón sube
+- [x] El libro guardado aparece en Favoritos
+- [x] Cerrar la app por completo y volver a abrirla conserva los favoritos
+- [x] *Guardado* en el detalle quita el libro de Favoritos
+- [x] Favoritos vacío muestra "Aún no tienes libros favoritos"
+- [x] Con modo avión, Favoritos sigue mostrando los libros guardados
 
 ## 4. Pruebas ejecutadas
 
@@ -47,7 +45,7 @@ Marcar después de probarlas en el simulador.
 |---|---|
 | Comando o forma de ejecución | ⌘U en Xcode (o `xcodebuild test`, ver README) |
 | Simulador / iOS | `Iphone 17 - IOS 26.5` |
-| Pruebas unitarias | `pasaron 45 de 45 ` |
+| Pruebas unitarias | `pasaron 46 de 46 ` |
 | Fecha | `17 de noviembre del 2026` |
 
 Las pruebas unitarias son 30 de XCTest y 15 de Swift Testing; no usan la red real. Las pruebas de interfaz son solo la plantilla de Xcode.
