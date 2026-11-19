@@ -38,7 +38,8 @@ Proyecto Bry y Yael/
 | ViewModel | `BookDetailViewModel` | Estado de "guardado", texto del botón, descripción del libro (carga bajo demanda) |
 | ViewModel | `FavoritesViewModel` | Lista de favoritos y si está vacía |
 | View | `ContentView`, `SecondView`, `FavoritesView` | Pantallas Inicio, Detalle y Favoritos |
-| View | `BookRow`, `SearchField` | Subvistas reutilizables. `BookRow.swift` también define la paleta de colores (`Color.app…`) |
+| View | `BookRow`, `SearchField` | Subvistas reutilizables |
+| View | `Theme` | Paleta de colores de la app (`Color.app…`) en `Views/Components/Theme.swift` |
 
 ### 2.3 Flujo de información
 
@@ -122,7 +123,7 @@ Las cancelaciones (`CancellationError` o `URLError.cancelled`) no se tratan como
 
 ## 6. Pruebas
 
-Se ejecutan con ⌘U en Xcode. Hay 30 pruebas con XCTest y 15 con Swift Testing. Ninguna usa la red real ni el disco real.
+Se ejecutan con ⌘U en Xcode. Hay 31 pruebas con XCTest y 15 con Swift Testing. Ninguna usa la red real ni el disco real.
 
 | Archivo | Qué cubre |
 |---|---|
