@@ -140,7 +140,7 @@ final class BookListViewModel {
     }
 
     var favoritesCount: Int {
-        store.favorites.count
+        store.favoriteIDs.count
     }
 
     // Evita descargar repetidamente el catálogo.

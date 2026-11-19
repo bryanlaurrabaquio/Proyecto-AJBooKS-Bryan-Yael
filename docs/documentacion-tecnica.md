@@ -38,7 +38,8 @@ Proyecto Bry y Yael/
 | ViewModel | `BookDetailViewModel` | Estado de "guardado", texto del botón, descripción del libro (carga bajo demanda) |
 | ViewModel | `FavoritesViewModel` | Lista de favoritos y si está vacía |
 | View | `ContentView`, `SecondView`, `FavoritesView` | Pantallas Inicio, Detalle y Favoritos |
-| View | `BookRow`, `SearchField` | Subvistas reutilizables. `BookRow.swift` también define la paleta de colores (`Color.app…`) |
+| View | `BookRow`, `SearchField` | Subvistas reutilizables |
+| View | `Theme` | Paleta de colores de la app (`Color.app…`) en `Views/Components/Theme.swift` |
 
 ### 2.3 Flujo de información
 
@@ -88,7 +89,7 @@ Las vistas no conocen la API ni SwiftData: solo leen propiedades del ViewModel. 
 | Cada elemento de `docs` | `OpenLibraryDocument` (`key`, `title`, `author_name?`, `first_publish_year?`, `subject?`, `cover_i?`) | `Book` |
 | Obra (`/works/…`) | `OpenLibraryWork` con `description` | Texto limpio (`cleanDescription`) |
 
-Reglas de conversión a `Book`: `id = key`; si no hay autores se usa "Autor desconocido"; el género es el primer `subject` no vacío; año y portada son opcionales. La descripción de una obra puede venir como texto o como objeto `{ "value": … }`, y se recorta lo que sigue a una línea de guiones (`----------`).
+Reglas de conversión a `Book`: `id = key`; si no hay autores se usa "Autor desconocido"; el género es el primer `subject` que esté en una lista de géneros conocidos (knownGenres); si ninguno coincide, queda sin género (nil); año y portada son opcionales. La descripción de una obra puede venir como texto o como objeto `{ "value": … }`, y se recorta lo que sigue a una línea de guiones (`----------`).
 
 ### 4.3 Manejo de errores
 
@@ -122,7 +123,7 @@ Las cancelaciones (`CancellationError` o `URLError.cancelled`) no se tratan como
 
 ## 6. Pruebas
 
-Se ejecutan con ⌘U en Xcode. Hay 30 pruebas con XCTest y 15 con Swift Testing. Ninguna usa la red real ni el disco real.
+Se ejecutan con ⌘U en Xcode. Hay 31 pruebas con XCTest y 15 con Swift Testing. Ninguna usa la red real ni el disco real.
 
 | Archivo | Qué cubre |
 |---|---|
@@ -157,7 +158,7 @@ Para evitar la red, `OpenLibraryService` recibe un `HTTPClient` (protocolo) y lo
 - **Sin conexión:** los favoritos muestran título, autor, año y género, pero no portada, y su descripción no se carga.
 - **Quitar favoritos:** solo se puede desde el detalle. `FavoritesViewModel.removeFavorite` existe y está probado, pero ninguna vista lo usa (no hay deslizar para borrar en Favoritos).
 - **Búsqueda:** trae como máximo 50 resultados y no tiene paginación. El filtro local solo ve los libros descargados del tema actual.
-- **Género y año:** el género es el primer `subject` de Open Library (a veces muy específico) y el año es el de la primera publicación, no el de la edición.
+- **Género y año:** Open Library no tiene un campo de género, solo etiquetas; la app muestra la primera que esté en su lista de géneros conocidos, y si no hay ninguna no muestra género. El año es el de la primera publicación, no el de la edición.
 - **Refresco aleatorio:** si falla (por ejemplo, sin internet) no muestra ningún aviso; se quedan los libros anteriores.
 - **Idioma:** los textos están solo en español.
 
@@ -171,7 +172,6 @@ Para evitar la red, `OpenLibraryService` recibe un `HTTPClient` (protocolo) y lo
 
 - `ContentView` y `SecondView` conservan su nombre original; en la práctica 5 se planteó renombrarlas a `BookListView` y `BookDetailView` (pendiente en [`mvvm-refactorizacion.md`](mvvm-refactorizacion.md#4-pendientes-estado-actual)).
 - Los ViewModels de Favoritos y de Detalle se crean dentro de `body` y de `navigationDestination`, por lo que se recrean al actualizarse la vista.
-- La paleta de colores está definida al final de `BookRow.swift`, no en un archivo propio.
 - Los errores de SwiftData solo se escriben en consola (`print`); si el `ModelContainer` no se puede crear al iniciar, la app termina con `fatalError`.
 - Las pruebas de interfaz (`UITests`) son la plantilla de Xcode.
 - Versión mínima de iOS: 26.5.

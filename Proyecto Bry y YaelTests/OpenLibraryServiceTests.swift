@@ -57,7 +57,7 @@ final class OpenLibraryServiceTests: XCTestCase {
                                          "title": "Libro de prueba",
                                          "author_name": ["Autora de prueba"],
                                          "first_publish_year": 1900,
-                                         "subject": ["Novela"]
+                                         "subject": ["bible", "nyt:combined-print-and-e-book-nonfiction=2024-09-29", "Fantasy"]
                                      },
                                      {
                                          "key": "/works/OL2W",
@@ -106,7 +106,7 @@ final class OpenLibraryServiceTests: XCTestCase {
         XCTAssertEqual(books[0].title, "Libro de prueba")
         XCTAssertEqual(books[0].author, "Autora de prueba")
         XCTAssertEqual(books[0].year, 1900)
-        XCTAssertEqual(books[0].genre, "Novela")
+        XCTAssertEqual(books[0].genre, "Fantasy")
     }
 
     // Comprueba campos opcionales ausentes.
@@ -123,6 +123,18 @@ final class OpenLibraryServiceTests: XCTestCase {
         )
         XCTAssertNil(books[1].year)
         XCTAssertNil(books[1].genre)
+    }
+
+    // Si ninguna etiqueta es un género conocido, no se inventa uno.
+    func testGeneroEsNilSiNingunSubjectEsGeneroConocido() async throws {
+        let json = #"{"docs":[{"key":"/works/OL3W","title":"Libro","subject":["Androids","bible"]}]}"#
+        let service = makeService(json: json)
+
+        let books = try await service.fetchBooks(
+            query: "subject:classics"
+        )
+
+        XCTAssertNil(books[0].genre)
     }
 
     // Una respuesta vacía no es un error HTTP.
