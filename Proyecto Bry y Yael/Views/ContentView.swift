@@ -4,14 +4,14 @@ import SwiftUI
 // y representa sus cuatro estados: cargando, contenido, vacío y error.
 // La vista no conoce la API: solo lee el estado que prepara BookListViewModel.
 
-enum AppRoute: Hasshable{
+enum AppRoute: Hashable{
     case favorites
 }
 
 struct ContentView: View {
     // El ViewModel se crea una sola vez con el BookStore que llega desde la App.
     @State var viewModel: BookListViewModel
-    @state private var favoritesViewModel: FavoritesViewModel
+    @State private var favoritesViewModel: FavoritesViewModel
 
     // Se guarda para pasárselo a los ViewModels de las pantallas a las que se navega.
     let store: BookStore
@@ -20,7 +20,7 @@ struct ContentView: View {
     init(store: BookStore, service: any BookServicing = OpenLibraryService()) {
         self.store = store
         _viewModel = State(initialValue: BookListViewModel(store: store, service: service))
-        -favoritesViewModel = State(initialValue: FavoritesViewModel(store: store))
+        _favoritesViewModel = State(initialValue: FavoritesViewModel(store: store))
     }
 
     var body: some View {
@@ -37,8 +37,8 @@ struct ContentView: View {
 
                     Spacer()
 
-                    // Acceso a Favoritos, con el contador que prepara el ViewModel.
-                    NavigationLink(Value: AppRoute.favorites){
+                    
+                    NavigationLink(value:AppRoute.favorites){
                         HStack {
                             Image(systemName: "heart.fill")
                             Text(String(viewModel.favoritesCount))
@@ -77,9 +77,7 @@ struct ContentView: View {
             .navigationDestination(for: Book.self) { book in
                 SecondView(viewModel: BookDetailViewModel(book: book, store: store))
             }
-            .navegationDestination(for: AppRoute.self){
-                
-                switch route{
+            .navigationDestination(for: AppRoute.self){route in switch route{
 
                     case .favorites:
                         FavoritesView(viewModel: favoritesViewModel)
