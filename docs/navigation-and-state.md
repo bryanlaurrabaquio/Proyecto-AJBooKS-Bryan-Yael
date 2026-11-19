@@ -22,7 +22,7 @@ BYbooKS es una app para descubrir libros en tendencia, buscarlos por título o a
 | `Models/` | `Book`, `BookStore` (estado compartido), `FavoriteBook` (SwiftData), `LoadState`, DTOs de Open Library |
 | `Services/` | `OpenLibraryService` (red), `FavoritesService` (disco), `BookServiceError` |
 | `ViewModels/` | `BookListViewModel`, `BookDetailViewModel`, `FavoritesViewModel` |
-| `Views/` | `ContentView` (Inicio), `SecondView` (Detalle), `FavoritesView`, `Components/` (`BookRow`, `SearchField`) |
+| `Views/` | `ContentView` (Inicio), `SecondView` (Detalle), `FavoritesView`, `Components/` (`BookRow`, `SearchField`, `Theme`) |
 | `Proyecto_Bry_y_YaelApp.swift` | Punto de entrada: crea SwiftData y el `BookStore` |
 
 ---
