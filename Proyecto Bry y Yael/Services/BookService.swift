@@ -155,7 +155,7 @@ struct OpenLibraryService: BookServicing {
             )
 
         // 5. Mapear JSON al modelo de la aplicación.
-            return result.docs.map { $0.toBook() }
+        return result.docs.map { $0.toBook() }
 
         } catch {
             throw BookServiceError.decoding
