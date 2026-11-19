@@ -99,7 +99,7 @@ Open Library pide a las aplicaciones identificarse con un `User-Agent`; la app e
 │   ├── Models/                     Book, BookStore, FavoriteBook, LoadState, DTOs de Open Library
 │   ├── Services/                   OpenLibraryService, FavoritesService, errores
 │   ├── ViewModels/                 BookListViewModel, BookDetailViewModel, FavoritesViewModel
-│   ├── Views/                      ContentView, SecondView, FavoritesView y Components/
+│   ├── Views/                      ContentView, SecondView, FavoritesView y Components/ (BookRow, SearchField, Theme)
 │   └── Proyecto_Bry_y_YaelApp.swift
 ├── Proyecto Bry y YaelTests/       Pruebas unitarias
 ├── Proyecto Bry y YaelUITests/     Plantilla de pruebas de interfaz (sin casos propios)
