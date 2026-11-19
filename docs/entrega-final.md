@@ -48,7 +48,7 @@
 | Pruebas unitarias | `pasaron 46 de 46 ` |
 | Fecha | `17 de noviembre del 2026` |
 
-Las pruebas unitarias son 30 de XCTest y 15 de Swift Testing; no usan la red real. Las pruebas de interfaz son solo la plantilla de Xcode.
+Las pruebas unitarias son 31 de XCTest y 15 de Swift Testing; no usan la red real. Las pruebas de interfaz son solo la plantilla de Xcode.
 
 ## 5. Limitaciones y pendientes
 
