@@ -157,7 +157,7 @@ Para evitar la red, `OpenLibraryService` recibe un `HTTPClient` (protocolo) y lo
 - **Sin conexión:** los favoritos muestran título, autor, año y género, pero no portada, y su descripción no se carga.
 - **Quitar favoritos:** solo se puede desde el detalle. `FavoritesViewModel.removeFavorite` existe y está probado, pero ninguna vista lo usa (no hay deslizar para borrar en Favoritos).
 - **Búsqueda:** trae como máximo 50 resultados y no tiene paginación. El filtro local solo ve los libros descargados del tema actual.
-- **Género y año:** el género es el primer `subject` de Open Library (a veces muy específico) y el año es el de la primera publicación, no el de la edición.
+- **Género y año:** Open Library no tiene un campo de género, solo etiquetas; la app muestra la primera que esté en su lista de géneros conocidos, y si no hay ninguna no muestra género y el año es el de la primera publicación, no el de la edición.
 - **Refresco aleatorio:** si falla (por ejemplo, sin internet) no muestra ningún aviso; se quedan los libros anteriores.
 - **Idioma:** los textos están solo en español.
 
@@ -171,7 +171,7 @@ Para evitar la red, `OpenLibraryService` recibe un `HTTPClient` (protocolo) y lo
 
 - `ContentView` y `SecondView` conservan su nombre original; en la práctica 5 se planteó renombrarlas a `BookListView` y `BookDetailView` (pendiente en [`mvvm-refactorizacion.md`](mvvm-refactorizacion.md#4-pendientes-estado-actual)).
 - Los ViewModels de Favoritos y de Detalle se crean dentro de `body` y de `navigationDestination`, por lo que se recrean al actualizarse la vista.
-- La paleta de colores está definida al final de `BookRow.swift`, no en un archivo propio.
+- La paleta de colores está definida en el archivo `Theme.swift` en la sub carpeta Components de la carpeta Views.
 - Los errores de SwiftData solo se escriben en consola (`print`); si el `ModelContainer` no se puede crear al iniciar, la app termina con `fatalError`.
 - Las pruebas de interfaz (`UITests`) son la plantilla de Xcode.
 - Versión mínima de iOS: 26.5.
