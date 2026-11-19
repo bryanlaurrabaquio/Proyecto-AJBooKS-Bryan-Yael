@@ -171,7 +171,6 @@ Para evitar la red, `OpenLibraryService` recibe un `HTTPClient` (protocolo) y lo
 
 - `ContentView` y `SecondView` conservan su nombre original; en la práctica 5 se planteó renombrarlas a `BookListView` y `BookDetailView` (pendiente en [`mvvm-refactorizacion.md`](mvvm-refactorizacion.md#4-pendientes-estado-actual)).
 - Los ViewModels de Favoritos y de Detalle se crean dentro de `body` y de `navigationDestination`, por lo que se recrean al actualizarse la vista.
-- La paleta de colores está definida en el archivo `Theme.swift` en la sub carpeta Components de la carpeta Views.
 - Los errores de SwiftData solo se escriben en consola (`print`); si el `ModelContainer` no se puede crear al iniciar, la app termina con `fatalError`.
 - Las pruebas de interfaz (`UITests`) son la plantilla de Xcode.
 - Versión mínima de iOS: 26.5.
