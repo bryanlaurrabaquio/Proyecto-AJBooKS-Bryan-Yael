@@ -88,7 +88,7 @@ Las vistas no conocen la API ni SwiftData: solo leen propiedades del ViewModel. 
 | Cada elemento de `docs` | `OpenLibraryDocument` (`key`, `title`, `author_name?`, `first_publish_year?`, `subject?`, `cover_i?`) | `Book` |
 | Obra (`/works/…`) | `OpenLibraryWork` con `description` | Texto limpio (`cleanDescription`) |
 
-Reglas de conversión a `Book`: `id = key`; si no hay autores se usa "Autor desconocido"; el género es el primer `subject` que esté en una lista de géneros conocidos (knownGenres); si ninguno coincide, queda sin género (null); año y portada son opcionales. La descripción de una obra puede venir como texto o como objeto `{ "value": … }`, y se recorta lo que sigue a una línea de guiones (`----------`).
+Reglas de conversión a `Book`: `id = key`; si no hay autores se usa "Autor desconocido"; el género es el primer `subject` que esté en una lista de géneros conocidos (knownGenres); si ninguno coincide, queda sin género (nil); año y portada son opcionales. La descripción de una obra puede venir como texto o como objeto `{ "value": … }`, y se recorta lo que sigue a una línea de guiones (`----------`).
 
 ### 4.3 Manejo de errores
 
