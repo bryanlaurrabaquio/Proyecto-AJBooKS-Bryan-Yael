@@ -154,12 +154,8 @@ struct OpenLibraryService: BookServicing {
                 from: data
             )
 
-            // 5. Mapear JSON al modelo de la aplicación.
-            let books = result.docs.map { $0.toBook() }
-
-            print("Open Library: \(books.count) libros recibidos")
-
-            return books
+        // 5. Mapear JSON al modelo de la aplicación.
+            return result.docs.map { $0.toBook() }
 
         } catch {
             throw BookServiceError.decoding
