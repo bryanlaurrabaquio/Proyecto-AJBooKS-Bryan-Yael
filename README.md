@@ -50,7 +50,7 @@ Encontrar un libro y llevar el control de los que nos interesan suele implicar v
 
    ```bash
    git clone https://github.com/bryanlaurrabaquio/Proyecto-AJBooKS-Bryan-Yael.git
-   cd Proyecto-AJBooKS-Bryan-Yael-main
+   cd Proyecto-AJBooKS-Bryan-Yael
    ```
 
 2. Abrir `Proyecto Bry y Yael.xcodeproj` con Xcode.
