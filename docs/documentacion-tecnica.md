@@ -157,7 +157,7 @@ Para evitar la red, `OpenLibraryService` recibe un `HTTPClient` (protocolo) y lo
 - **Sin conexión:** los favoritos muestran título, autor, año y género, pero no portada, y su descripción no se carga.
 - **Quitar favoritos:** solo se puede desde el detalle. `FavoritesViewModel.removeFavorite` existe y está probado, pero ninguna vista lo usa (no hay deslizar para borrar en Favoritos).
 - **Búsqueda:** trae como máximo 50 resultados y no tiene paginación. El filtro local solo ve los libros descargados del tema actual.
-- **Género y año:** Open Library no tiene un campo de género, solo etiquetas; la app muestra la primera que esté en su lista de géneros conocidos, y si no hay ninguna no muestra género y el año es el de la primera publicación, no el de la edición.
+- **Género y año:** Open Library no tiene un campo de género, solo etiquetas; la app muestra la primera que esté en su lista de géneros conocidos, y si no hay ninguna no muestra género. El año es el de la primera publicación, no el de la edición.
 - **Refresco aleatorio:** si falla (por ejemplo, sin internet) no muestra ningún aviso; se quedan los libros anteriores.
 - **Idioma:** los textos están solo en español.
 
