@@ -128,6 +128,6 @@ Resumen; la lista completa está en la [documentación técnica](docs/documentac
 - Sin conexión, los favoritos se ven (título, autor, año y género) pero no sus portadas, y su descripción no se puede cargar.
 - Desde la pantalla de Favoritos no se puede quitar un libro: se hace desde su detalle.
 - La búsqueda trae como máximo 50 resultados y no tiene paginación.
-- El género es el primer *subject* que devuelve Open Library, por lo que a veces es muy específico o poco útil.
+- Open Library no tiene un campo de género, solo etiquetas; la app muestra la primera que esté en su lista de géneros conocidos y, si no hay ninguna, no muestra género.
 - La app fuerza el tema claro y solo tiene textos en español.
 - Las pruebas de interfaz (`UITests`) son la plantilla de Xcode; la lógica está cubierta con pruebas unitarias.
