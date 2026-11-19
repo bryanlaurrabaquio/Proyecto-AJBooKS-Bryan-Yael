@@ -125,6 +125,18 @@ final class OpenLibraryServiceTests: XCTestCase {
         XCTAssertNil(books[1].genre)
     }
 
+    // Si ninguna etiqueta es un género conocido, no se inventa uno.
+    func testGeneroEsNilSiNingunSubjectEsGeneroConocido() async throws {
+        let json = #"{"docs":[{"key":"/works/OL3W","title":"Libro","subject":["Androids","bible"]}]}"#
+        let service = makeService(json: json)
+
+        let books = try await service.fetchBooks(
+            query: "subject:classics"
+        )
+
+        XCTAssertNil(books[0].genre)
+    }
+
     // Una respuesta vacía no es un error HTTP.
     func testRespuestaVacia() async throws {
         let service = makeService(
