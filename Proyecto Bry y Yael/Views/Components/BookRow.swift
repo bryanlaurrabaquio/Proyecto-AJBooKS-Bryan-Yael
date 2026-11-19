@@ -47,22 +47,3 @@ struct BookRow: View {
     BookRow(book: Book.samples[0])
 }
 
-// Paleta de la app: base café, en tonos claros.
-// Todos los colores salen de aquí, así que para cambiar la paleta solo se editan estas líneas.
-extension Color {
-    static let appBackground = Color(hex: 0xE6D6BD)   // crema oscuro (fondo de las pantallas)
-    static let appCard = Color(hex: 0xFAF3E8)         // crema claro (tarjetas, resaltan sobre el fondo)
-    static let appCover = Color(hex: 0xE3D2BC)        // fondo de las portadas
-    static let appAccent = Color(hex: 0x9C4F1B)       // café canela (título, año/género, botones)
-    static let appText = Color(hex: 0x3E2A1C)         // café oscuro (textos principales)
-    static let appMuted = Color(hex: 0x75594A)        // café grisáceo (autor, descripciones)
-    static let appInactive = Color(hex: 0x8C7B6B)     // botón "Guardar" sin guardar
-
-    init(hex: UInt32) {
-        self.init(
-            red: Double((hex >> 16) & 0xFF) / 255,
-            green: Double((hex >> 8) & 0xFF) / 255,
-            blue: Double(hex & 0xFF) / 255
-        )
-    }
-}
