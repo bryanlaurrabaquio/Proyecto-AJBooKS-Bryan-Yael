@@ -21,9 +21,9 @@ final class BookStore {
     // Favoritos guardados en SwiftData.
     private(set) var favoriteRecords: [FavoriteBook] = []
 
-    var favoriteIDs: [String] {
-        favoriteRecords.map { $0.bookID }
-    }
+    // Ids de los favoritos. Set no admite repetidos y buscar un id es directo.
+    // Se actualiza en loadFavorites(), cada vez que cambian los registros.
+    private(set) var favoriteIDs: Set<String> = []
 
     // Se reconstruyen desde los datos persistidos.
     // No dependen de los resultados de Open Library.
@@ -58,5 +58,7 @@ final class BookStore {
     func loadFavorites() {
         favoriteRecords =
         favoritesService.fetchFavorites() ?? []
+
+        favoriteIDs = Set(favoriteRecords.map { $0.bookID })
     }
 }
