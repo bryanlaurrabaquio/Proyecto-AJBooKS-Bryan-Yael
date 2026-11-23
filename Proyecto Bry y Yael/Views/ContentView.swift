@@ -17,7 +17,8 @@ struct ContentView: View {
     let store: BookStore
 
     // El servicio se puede sustituir (por ejemplo, en la vista previa) sin tocar la red.
-    init(store: BookStore, service: any BookServicing = OpenLibraryService()) {
+    // Si no se indica, el ViewModel usa Open Library.
+    init(store: BookStore, service: (any BookServicing)? = nil) {
         self.store = store
         _viewModel = State(initialValue: BookListViewModel(store: store, service: service))
         _favoritesViewModel = State(initialValue: FavoritesViewModel(store: store))
@@ -37,8 +38,7 @@ struct ContentView: View {
 
                     Spacer()
 
-                    
-                    NavigationLink(value:AppRoute.favorites){
+                    NavigationLink(value: AppRoute.favorites) {
                         HStack {
                             Image(systemName: "heart.fill")
                             Text(String(viewModel.favoritesCount))
@@ -48,29 +48,33 @@ struct ContentView: View {
                     .accessibilityLabel("Ver favoritos")
                 }
 
-                Text(viewModel.isShowingSearchResults ? "Resultados de Open Library" : "Libros en tendencia")
+                Text(viewModel.hasSearchText ? "Resultados de búsqueda" : "Libros en tendencia")
                     .foregroundColor(.appMuted)
 
                 // La subvista recibe el texto con @Binding (no tiene copia propia).
                 SearchField(text: $viewModel.searchText)
-                    // Al presionar "Buscar" se consulta toda la base de Open Library.
+                    // Al presionar "Buscar" se consulta Open Library de inmediato.
                     .onSubmit {
                         Task {
                             await viewModel.search()
                         }
                     }
-                    // Si el usuario edita el texto, se vuelve a la lista de inicio.
-                    .onChange(of: viewModel.searchText) {
-                        viewModel.resetSearch()
+                    // Cada vez que cambia el texto se busca sola en Open Library tras una pausa corta.
+                    // Si el usuario sigue escribiendo, SwiftUI cancela la tarea anterior.
+                    .task(id: viewModel.searchText) {
+                        await viewModel.searchAfterTyping()
                     }
 
-                if viewModel.isShowingSearchResults {
+                if viewModel.hasSearchText {
                     searchResults
                 } else {
                     catalog
                 }
             }
             .padding()
+            // Ocupa toda la pantalla aunque haya poco contenido (un mensaje o un indicador):
+            // así el contenido queda arriba y el fondo crema cubre todo, no solo una franja.
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             // Fondo crema también detrás de la barra de navegación.
             .background(Color.appBackground.ignoresSafeArea())
             .toolbarBackground(Color.appBackground, for: .navigationBar)
@@ -143,58 +147,78 @@ struct ContentView: View {
 
         // Content: libros obtenidos del servicio remoto.
         case .content:
-            if viewModel.noResults {
-                Text("No se encontraron libros para " + viewModel.searchText + " en esta lista. Presiona Buscar para buscar en Open Library.")
-                    .foregroundColor(.appMuted)
-                    .padding(.top)
-            } else {
-                bookList(viewModel.filteredBooks)
-                    // Al jalar hacia abajo se cambian los 10 libros por otros al azar.
-                    .refreshable {
-                        await viewModel.refreshRandomBooks()
-                    }
-            }
+            bookList(viewModel.books)
+                // Al jalar hacia abajo se cambian los 10 libros por otros al azar.
+                .refreshable {
+                    await viewModel.refreshRandomBooks()
+                }
         }
     }
 
-    // Resultados de buscar en toda la base de Open Library (mismos estados que el catálogo).
+    // Resultados mientras hay texto: coincidencias locales al instante
+    // más los libros que encuentra Open Library.
     @ViewBuilder
     private var searchResults: some View {
-        switch viewModel.searchState {
+        let books = viewModel.searchResults
 
-        case .idle, .loading:
-            ProgressView("Buscando en Open Library…")
-                .frame(maxWidth: .infinity)
-                .padding(.top, 40)
-
-        case .error(let error):
-            VStack(spacing: 12) {
-                Image(systemName: "exclamationmark.triangle")
-                    .font(.largeTitle)
-                    .foregroundColor(.appAccent)
-
-                Text(error.localizedDescription)
-                    .multilineTextAlignment(.center)
-
-                Button("Reintentar") {
-                    Task {
-                        await viewModel.search()
+        if !books.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                // Aviso discreto mientras llegan más resultados de Open Library.
+                if viewModel.isSearchingOnline {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text(viewModel.searchingMessage)
                     }
+                    .font(.footnote)
+                    .foregroundColor(.appMuted)
+                    .accessibilityElement(children: .combine)
                 }
-                .buttonStyle(.borderedProminent)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.top, 40)
 
-        case .empty:
-            Text("Open Library no encontró libros para " + viewModel.searchText)
-                .foregroundColor(.appMuted)
-                .multilineTextAlignment(.center)
+                bookList(books)
+            }
+        } else {
+            switch viewModel.searchState {
+
+            case .idle, .loading, .content:
+                ProgressView(viewModel.searchingMessage)
+                    .foregroundColor(.appMuted)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 40)
+
+            case .error(let error):
+                VStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.largeTitle)
+                        .foregroundColor(.appAccent)
+
+                    Text(error.localizedDescription)
+                        .foregroundColor(.appText)
+                        .multilineTextAlignment(.center)
+
+                    Button("Reintentar") {
+                        Task {
+                            await viewModel.search()
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
                 .frame(maxWidth: .infinity)
                 .padding(.top, 40)
 
-        case .content(let books):
-            bookList(books)
+            case .empty:
+                VStack(spacing: 12) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.largeTitle)
+                        .foregroundColor(.appAccent)
+                        .accessibilityHidden(true)
+
+                    Text(viewModel.noMatchesMessage)
+                        .foregroundColor(.appMuted)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 40)
+            }
         }
     }
 
