@@ -2,10 +2,10 @@
 
 @MainActor
 func makeSeededStore(
-favoritesService: any FavoritesServiceProtocol =
-InMemoryFavoritesService()
+favoritesService: (any FavoritesServiceProtocol)? = nil
 ) -> BookStore {
 
+    // Sin servicio indicado, BookStore usa favoritos en memoria.
     let store = BookStore(
         favoritesService: favoritesService
     )

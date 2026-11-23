@@ -10,14 +10,16 @@ final class BookDetailViewModel {
     let book: Book
     private(set) var loadedDescription: String?
 
+    // Si no se indica un servicio se usa Open Library. Se crea dentro del init
+    // (en el MainActor) para evitar la advertencia de aislamiento de actores.
     init(
     book: Book,
     store: BookStore,
-    service: any BookServicing = OpenLibraryService()
+    service: (any BookServicing)? = nil
     ) {
         self.book = book
         self.store = store
-        self.service = service
+        self.service = service ?? OpenLibraryService()
     }
 
     // Se lee del BookStore, no se guarda una copia aquí.

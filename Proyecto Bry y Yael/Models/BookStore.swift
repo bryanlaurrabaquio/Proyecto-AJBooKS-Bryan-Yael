@@ -33,11 +33,13 @@ final class BookStore {
 
     private let favoritesService: any FavoritesServiceProtocol
 
+    // Si no se indica un servicio se usan favoritos en memoria (vistas previas y pruebas).
+    // Se crea dentro del init (en el MainActor) para evitar la advertencia
+    // "Call to main actor-isolated initializer in a synchronous nonisolated context".
     init(
-    favoritesService: any FavoritesServiceProtocol =
-    InMemoryFavoritesService()
+    favoritesService: (any FavoritesServiceProtocol)? = nil
     ) {
-        self.favoritesService = favoritesService
+        self.favoritesService = favoritesService ?? InMemoryFavoritesService()
         loadFavorites()
     }
 
