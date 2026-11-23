@@ -28,7 +28,7 @@
 - [x] Al abrir la app se carga el catálogo de libros en tendencia
 - [x] Jalar la lista hacia abajo cambia los libros por otros
 - [x] Escribir en el campo filtra los libros descargados por título o autor
-- [x] Presionar *Buscar* consulta Open Library y muestra los resultados
+- [x] Al escribir se consulta Open Library automáticamente (o de inmediato al presionar *Buscar*) y se muestran los resultados
 - [x] Buscar algo inexistente muestra el mensaje de "sin resultados"
 - [x] Con el modo avión activado se muestra el error con *Reintentar*, y al reconectar funciona
 - [x] Tocar un libro abre el detalle con portada, autor, año, género y descripción

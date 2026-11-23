@@ -110,7 +110,7 @@ Las cancelaciones (`CancellationError` o `URLError.cancelled`) no se tratan como
 
 - **Al iniciar:** consulta `subject:classics` (hasta 50 libros) y muestra 10 al azar. `loadIfNeeded()` evita descargar de nuevo al volver a la pantalla.
 - **Al jalar la lista:** elige un tema al azar de `randomSubjects` (distinto del anterior) y una posición al azar (`offset` entre 0 y 999). Si esa posición no devuelve libros, pide desde 0. Si falla, se conservan los libros que ya se ven.
-- **Búsqueda:** mientras se escribe se filtra localmente por título o autor sobre los libros ya descargados; al presionar *Buscar* se consulta Open Library.
+- **Búsqueda:** mientras se escribe se filtra localmente por título o autor sobre los libros ya descargados y, tras una pausa de 0.5 s (`.task(id:)` + `searchAfterTyping()`), se consulta Open Library automáticamente; los resultados se combinan sin repetir libros. Al presionar *Buscar* se consulta de inmediato.
 
 ## 5. Persistencia
 

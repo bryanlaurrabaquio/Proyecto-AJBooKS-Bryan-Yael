@@ -17,7 +17,7 @@ Encontrar un libro y llevar el control de los que nos interesan suele implicar v
 
 - **Catálogo de inicio:** al abrir la app se muestran 10 libros del tema *classics* de Open Library. Al jalar la lista hacia abajo se cambian por 10 libros de otro tema elegido al azar.
 - **Búsqueda local:** al escribir en el campo de búsqueda se filtran, por título o autor, los libros ya descargados.
-- **Búsqueda en Open Library:** al presionar *Buscar* en el teclado se consulta toda la base de datos de Open Library (hasta 50 resultados).
+- **Búsqueda en Open Library:** al escribir, primero aparecen las coincidencias de los libros ya descargados y, medio segundo después de dejar de escribir, se consulta toda la base de datos de Open Library (hasta 50 resultados). Presionar *Buscar* en el teclado consulta de inmediato.
 - **Detalle del libro:** portada, título, autor, año de primera publicación, género y descripción. La descripción se pide aparte a Open Library; si no existe se muestra "Descripción no disponible.".
 - **Favoritos persistentes:** se guardan y se quitan desde el botón *Guardar / Guardado* del detalle. Se almacenan con SwiftData y siguen ahí al cerrar y volver a abrir la app. La lista se consulta desde el botón del corazón en Inicio, que muestra el contador.
 - **Estados de la interfaz:** cargando, contenido, sin resultados y error (con botón *Reintentar*), tanto en el catálogo como en la búsqueda. La pantalla de favoritos muestra un mensaje cuando está vacía.
