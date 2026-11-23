@@ -29,7 +29,8 @@ final class BookListViewModel {
     // Libros descargados del tema actual. De aquí se sacan los 10 al azar.
     private var allBooks: [Book] = []
 
-    // Resultado de buscar en toda la base de Open Library (al presionar "Buscar").
+    // Resultado de buscar en toda la base de Open Library.
+    // La búsqueda se lanza sola cuando el usuario deja de escribir, o al presionar "Buscar".
     // .idle significa que no hay una búsqueda activa.
     private(set) var searchState: LoadState = .idle
 
@@ -39,12 +40,20 @@ final class BookListViewModel {
     // Último tema consultado, para no repetirlo en el siguiente refresco.
     private var lastSubject = "classics"
 
+    // Pausa que se espera después de la última tecla antes de consultar Open Library.
+    // Así no se hace una petición por cada letra.
+    private let searchDelay: Duration
+
+    // Si no se indica un servicio se usa Open Library. Se crea dentro del init
+    // (en el MainActor) para evitar la advertencia de aislamiento de actores.
     init(
     store: BookStore,
-    service: any BookServicing = OpenLibraryService()
+    service: (any BookServicing)? = nil,
+    searchDelay: Duration = .milliseconds(500)
     ) {
         self.store = store
-        self.service = service
+        self.service = service ?? OpenLibraryService()
+        self.searchDelay = searchDelay
     }
 
     // Se lee directamente del BookStore.
@@ -86,11 +95,80 @@ final class BookListViewModel {
         return true
     }
 
-    // Se llama al presionar "Buscar" en el teclado: consulta toda la base de Open Library.
+    // MARK: - Búsqueda
+
+    private var trimmedSearchText: String {
+        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    // Verdadero cuando hay algo escrito: la pantalla cambia del catálogo a los resultados.
+    var hasSearchText: Bool {
+        !trimmedSearchText.isEmpty
+    }
+
+    // Resultados que se muestran mientras hay texto:
+    // primero las coincidencias de los libros ya descargados (aparecen al instante)
+    // y después los de Open Library, sin repetir libros.
+    var searchResults: [Book] {
+        var results = filteredBooks
+
+        if case .content(let remote) = searchState {
+            let shownIDs = Set(results.map { $0.id })
+            results += remote.filter { !shownIDs.contains($0.id) }
+        }
+
+        return results
+    }
+
+    // Verdadero mientras se espera la respuesta de Open Library.
+    var isSearchingOnline: Bool {
+        searchState == .loading
+    }
+
+    var searchingMessage: String {
+        "Buscando “\(trimmedSearchText)” en Open Library…"
+    }
+
+    var noMatchesMessage: String {
+        "No se encontraron libros para “\(trimmedSearchText)”. Prueba con otro título o autor."
+    }
+
+    // Se llama cada vez que cambia el texto (desde .task(id:) en la vista).
+    // Espera una pausa corta: si el usuario sigue escribiendo, SwiftUI cancela esta tarea
+    // y empieza otra con el texto nuevo, así solo se consulta la última versión.
+    func searchAfterTyping() async {
+        let text = trimmedSearchText
+
+        if text.isEmpty {
+            resetSearch()
+            return
+        }
+
+        // Al regresar del detalle la tarea se vuelve a ejecutar con el mismo texto:
+        // si esa búsqueda ya terminó, se conservan sus resultados.
+        if text == activeQuery && searchFinished {
+            return
+        }
+
+        activeQuery = text
+        searchState = .loading
+
+        do {
+            try await Task.sleep(for: searchDelay)
+        } catch {
+            // El usuario siguió escribiendo (o salió de la pantalla): no se consulta.
+            return
+        }
+
+        // Si mientras tanto presionó "Buscar", esa búsqueda ya se hizo.
+        guard activeQuery == text, !searchFinished else { return }
+
+        await performSearch(text)
+    }
+
+    // Se llama al presionar "Buscar" en el teclado o "Reintentar": consulta de inmediato.
     func search() async {
-        let text = searchText.trimmingCharacters(
-            in: .whitespacesAndNewlines
-        )
+        let text = trimmedSearchText
 
         if text.isEmpty {
             resetSearch()
@@ -99,7 +177,25 @@ final class BookListViewModel {
 
         activeQuery = text
         searchState = .loading
+        await performSearch(text)
+    }
 
+    // Se llama cuando se borra el texto: vuelve a la lista de inicio.
+    func resetSearch() {
+        activeQuery = ""
+        searchState = .idle
+    }
+
+    private var searchFinished: Bool {
+        switch searchState {
+        case .content, .empty, .error:
+            return true
+        case .idle, .loading:
+            return false
+        }
+    }
+
+    private func performSearch(_ text: String) async {
         do {
             let found = try await service.fetchBooks(query: text)
 
@@ -109,8 +205,10 @@ final class BookListViewModel {
             searchState = found.isEmpty ? .empty : .content(found)
 
         } catch is CancellationError {
+            // Se canceló sin que llegara otro texto (por ejemplo, al abrir un libro):
+            // se deja lista para volver a buscar al regresar.
             if activeQuery == text {
-                searchState = .idle
+                resetSearch()
             }
 
         } catch let error as BookServiceError {
@@ -121,12 +219,6 @@ final class BookListViewModel {
             guard activeQuery == text else { return }
             searchState = .error(.unknown)
         }
-    }
-
-    // Se llama cuando el usuario edita el texto: vuelve a la lista de inicio.
-    func resetSearch() {
-        activeQuery = ""
-        searchState = .idle
     }
 
     // Solo se considera "sin coincidencias"

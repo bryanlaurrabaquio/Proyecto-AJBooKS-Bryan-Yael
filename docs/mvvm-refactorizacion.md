@@ -50,7 +50,7 @@ Proyecto Bry y Yael/
 |---|---|
 | Descargar el catálogo y manejar sus estados (`loadIfNeeded`, `retry`, `loadBooks`) | `BookListViewModel` |
 | Elegir 10 libros al azar y cambiarlos al jalar la lista (`refreshRandomBooks`) | `BookListViewModel` |
-| Buscar en Open Library al presionar *Buscar* (`search`, `searchState`) e ignorar respuestas viejas | `BookListViewModel` |
+| Buscar en Open Library al dejar de escribir o al presionar *Buscar* (`searchAfterTyping`, `search`, `searchState`) e ignorar respuestas viejas | `BookListViewModel` |
 | Cargar la descripción del libro y los textos de año, género y descripción (`loadDescription`, `yearText`, `genreText`, `descriptionText`) | `BookDetailViewModel` |
 
 **Se quedó en las vistas:** layout, colores, modifiers, `NavigationStack`/`NavigationLink`/`navigationDestination` y los textos fijos de la interfaz.

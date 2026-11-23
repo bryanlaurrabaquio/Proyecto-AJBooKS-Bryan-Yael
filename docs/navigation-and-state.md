@@ -62,7 +62,7 @@ Desde el detalle y desde Favoritos se regresa con el botón *back*.
 |---|---|
 | **Muestra** | Título, botón de favoritos con contador, campo de búsqueda y, por cada libro: portada, título, autor y "año - género" (si existen). También los estados de carga, sin resultados y error |
 | **Recibe** | El estado del catálogo (`BookStore.catalogState`) y el resultado de la búsqueda (`searchState`), ambos como `LoadState` |
-| **Modifica** | El texto de búsqueda. Al presionar *Buscar* lanza la consulta a Open Library; al jalar la lista pide otros libros al azar |
+| **Modifica** | El texto de búsqueda. Al dejar de escribir (o al presionar *Buscar*) lanza la consulta a Open Library; al jalar la lista pide otros libros al azar |
 | **Necesita conservar** | El catálogo descargado y el texto de búsqueda, que se mantienen al ir al detalle y volver |
 
 ### Pantalla 2 · Detalle
