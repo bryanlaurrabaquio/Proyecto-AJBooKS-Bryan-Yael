@@ -49,6 +49,9 @@ struct SecondView: View {
                 }
                 .accessibilityLabel(viewModel.buttonAccessibilityLabel)
 
+                // Stock del local, apartar y (para la encargada) ajustar la existencia.
+                StockSection(book: viewModel.book)
+
                 Text("Descripción")
                     .font(.headline)
 

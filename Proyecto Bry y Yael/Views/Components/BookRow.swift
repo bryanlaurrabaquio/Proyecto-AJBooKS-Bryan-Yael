@@ -4,6 +4,10 @@ import SwiftUI
 struct BookRow: View {
     var book: Book
 
+    // Inventario del local. Es opcional: en vistas previas o pruebas puede no haberlo
+    // y entonces la tarjeta se ve igual que antes.
+    @Environment(ReservationStore.self) private var reservations: ReservationStore?
+
     var body: some View {
         HStack {
             AsyncImage(url: book.coverURL()) { image in
@@ -32,6 +36,12 @@ struct BookRow: View {
                     Text(subtitle)
                         .font(.caption)
                         .foregroundColor(.appAccent)
+                }
+
+                // Stock del local: "Disponibles: N" o "Sin stock". Si el libro no está en el
+                // inventario no se muestra nada.
+                if let availability = reservations?.availability(for: book) {
+                    AvailabilityChip(availability: availability)
                 }
             }
 
