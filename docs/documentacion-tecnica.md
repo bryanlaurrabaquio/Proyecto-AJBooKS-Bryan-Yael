@@ -8,7 +8,7 @@ Este documento describe lo que **está implementado en la versión final** de la
 
 ## 1. Resumen
 
-BYbooKS es una app iOS (SwiftUI) con tres pantallas: **Inicio** (catálogo y búsqueda), **Detalle** del libro y **Favoritos**. Consulta la API pública de Open Library y guarda los favoritos en el dispositivo con SwiftData. Está organizada con el patrón MVVM y un único `BookStore` como fuente de verdad compartida.
+BYbooKS es una app iOS (SwiftUI) con tres pantallas en la pestaña *Libros*: **Inicio** (catálogo y búsqueda), **Detalle** del libro y **Favoritos**, y una pestaña *Apartados* (módulo piloto para una librería de barrio, descrito en [`modulo-apartados.md`](modulo-apartados.md)). Consulta la API pública de Open Library y guarda los favoritos, el inventario y los folios en el dispositivo con SwiftData. Está organizada con el patrón MVVM y un único `BookStore` como fuente de verdad compartida (y un `ReservationStore` para los apartados).
 
 ## 2. Arquitectura
 
@@ -40,6 +40,7 @@ Proyecto Bry y Yael/
 | View | `ContentView`, `SecondView`, `FavoritesView` | Pantallas Inicio, Detalle y Favoritos |
 | View | `BookRow`, `SearchField` | Subvistas reutilizables |
 | View | `Theme` | Paleta de colores de la app (`Color.app…`) en `Views/Components/Theme.swift` |
+| Model / Service / ViewModel / View | Módulo de apartados | `ReservationStore`, `ReservationRepository`, `BookStockViewModel`, `ReservationsViewModel`, `InventoryViewModel`, `RootView`, `ReservationsView`, `StockSection`… Detalle en [`modulo-apartados.md`](modulo-apartados.md#6-arquitectura-del-módulo) |
 
 ### 2.3 Flujo de información
 
@@ -59,7 +60,7 @@ Las vistas no conocen la API ni SwiftData: solo leen propiedades del ViewModel. 
 
 ### 2.4 Navegación
 
-`ContentView` contiene un `NavigationStack`. Se navega por valor: `NavigationLink(value: book)` y un único `navigationDestination(for: Book.self)` que abre `SecondView`. Ese mismo destino sirve para llegar al detalle desde Inicio, desde los resultados de búsqueda y desde Favoritos (que se abre con otro `NavigationLink` en el mismo stack).
+`RootView` es un `TabView` con dos pestañas, *Libros* (`ContentView`) y *Apartados* (`ReservationsView`); cada una tiene su propio `NavigationStack`. En *Libros* se navega por valor: `NavigationLink(value: book)` y un único `navigationDestination(for: Book.self)` que abre `SecondView`. Ese mismo destino sirve para llegar al detalle desde Inicio, desde los resultados de búsqueda y desde Favoritos (que se abre con otro `NavigationLink` en el mismo stack).
 
 ## 3. Estado de la interfaz
 
@@ -115,7 +116,7 @@ Las cancelaciones (`CancellationError` o `URLError.cancelled`) no se tratan como
 ## 5. Persistencia
 
 - **Mecanismo:** SwiftData. El `ModelContainer` se crea en `Proyecto_Bry_y_YaelApp` con `isStoredInMemoryOnly: false` (se guarda en disco).
-- **Qué se guarda:** únicamente los favoritos, como `FavoriteBook`: `bookID`, `title`, `author`, `year` (texto), `genre` (texto) y `coverID`.
+- **Qué se guarda:** los favoritos, como `FavoriteBook`: `bookID`, `title`, `author`, `year` (texto), `genre` (texto) y `coverID`; y, del módulo de apartados, el inventario (`InventoryRecord`) y los folios (`ReservationRecord`). Ver [`modulo-apartados.md`](modulo-apartados.md#7-persistencia).
 - **Qué no se guarda:** la descripción, las portadas ni el catálogo. Un favorito se reconstruye con `toBook()` sin consultar la red.
 - **Sin duplicados:** `saveFavorite` busca por `bookID` antes de insertar.
 - **Identidad:** un libro es favorito si coincide su `id` (clave de Open Library), no su título.
@@ -123,7 +124,7 @@ Las cancelaciones (`CancellationError` o `URLError.cancelled`) no se tratan como
 
 ## 6. Pruebas
 
-Se ejecutan con ⌘U en Xcode. Hay 31 pruebas con XCTest y 15 con Swift Testing. Ninguna usa la red real ni el disco real.
+Se ejecutan con ⌘U en Xcode. Hay 38 funciones de prueba con XCTest y 70 con Swift Testing (las parametrizadas cuentan como una). Ninguna usa la red real ni el disco real.
 
 | Archivo | Qué cubre |
 |---|---|
@@ -131,6 +132,7 @@ Se ejecutan con ⌘U en Xcode. Hay 31 pruebas con XCTest y 15 con Swift Testing.
 | `FavoritesServiceTests` | `FavoritesService` real sobre SwiftData **en memoria**: guardar, no duplicar, quitar, quitar uno inexistente, persistir entre contextos, mismo título con distinto `id` |
 | `BookStoreFavoritesTests` | `BookStore` con un servicio de favoritos falso: carga inicial, alternar, falla del servicio, identidad por `id`, contador |
 | `Proyecto_Bry_y_YaelTests` | `Book.subtitle`, conversión a favorito, filtro de búsqueda, contador, `BookDetailViewModel` y `FavoritesViewModel` |
+| `StockRulesTests`, `ReservationPermissionsTests`, `ReservationViewModelTests`, `ReservationPersistenceTests` | Módulo de apartados: fórmula de stock, último ejemplar, entrega, cancelar y vencer, permisos por perfil, textos de las pantallas y persistencia en SwiftData en memoria. Detalle en [`modulo-apartados.md`](modulo-apartados.md#10-pruebas-del-módulo) |
 | `Proyecto_Bry_y_YaelUITests` | Solo la plantilla de Xcode (lanzar la app); sin casos propios |
 
 Para evitar la red, `OpenLibraryService` recibe un `HTTPClient` (protocolo) y los ViewModels reciben un `BookServicing`; en pruebas se sustituyen por versiones falsas.
@@ -175,3 +177,7 @@ Para evitar la red, `OpenLibraryService` recibe un `HTTPClient` (protocolo) y lo
 - Los errores de SwiftData solo se escriben en consola (`print`); si el `ModelContainer` no se puede crear al iniciar, la app termina con `fatalError`.
 - Las pruebas de interfaz (`UITests`) son la plantilla de Xcode.
 - Versión mínima de iOS: 26.5.
+
+**Módulo de apartados**
+
+- El inventario y los folios viven en un solo dispositivo (sin sincronización); los perfiles son un selector sin contraseña; el plazo de vencimiento (3 días) es un supuesto. Lista completa en [`modulo-apartados.md`](modulo-apartados.md#8-supuestos-y-limitaciones).
