@@ -1,6 +1,6 @@
 # BYbooKS — Gestor Personal de Libros
 
-Aplicación iOS para descubrir libros, buscarlos en Open Library, ver su detalle y guardarlos como favoritos en el dispositivo.
+Aplicación iOS para descubrir libros, buscarlos en Open Library, ver su detalle y guardarlos como favoritos en el dispositivo. Incluye un **módulo de apartados** (piloto) para una librería de barrio: inventario del local, folios y dos perfiles. Ver [`docs/modulo-apartados.md`](docs/modulo-apartados.md).
 
 **Equipo 8**
 
@@ -23,6 +23,8 @@ Encontrar un libro y llevar el control de los que nos interesan suele implicar v
 - **Estados de la interfaz:** cargando, contenido, sin resultados y error (con botón *Reintentar*), tanto en el catálogo como en la búsqueda. La pantalla de favoritos muestra un mensaje cuando está vacía.
 - **Datos faltantes:** si un libro no trae portada, año, género o descripción, se muestra un texto o ícono de reemplazo en lugar de dejar el espacio vacío.
 - **Accesibilidad:** etiquetas de VoiceOver en portadas, botón de guardar y acceso a favoritos.
+- **Navegación:** dos pestañas, *Libros* (catálogo, búsqueda y favoritos) y *Apartados*.
+- **Módulo de apartados (piloto):** la pestaña *Apartados* muestra los folios y el inventario del local. Un folio se puede apartar, entregar, cancelar o vencer, y siempre se cumple *Disponibles = Existencia física − Apartados activos*. Hay dos perfiles, vendedor y encargada (solo la encargada ajusta existencias), y las tarjetas de los libros muestran *Disponibles: N* o *Sin stock*. Es un caso simulado (*Página de Barrio*); el detalle, los supuestos y los límites están en [`docs/modulo-apartados.md`](docs/modulo-apartados.md).
 
 ## Tecnologías
 
@@ -30,7 +32,7 @@ Encontrar un libro y llevar el control de los que nos interesan suele implicar v
 |---|---|
 | Swift y SwiftUI | Lenguaje e interfaz |
 | Observation (`@Observable`) | Estado compartido y ViewModels |
-| SwiftData | Persistencia local de favoritos |
+| SwiftData | Persistencia local de favoritos, inventario y folios |
 | URLSession + `async/await` | Consumo de la API |
 | Open Library Search API | Búsqueda de libros (`openlibrary.org/search.json`) |
 | Open Library Works API | Descripción del libro (`openlibrary.org/works/{id}.json`) |
@@ -91,15 +93,17 @@ Open Library pide a las aplicaciones identificarse con un `User-Agent`; la app e
 |---|---|
 | ![Detalle](docs/screenshots/03-detalle.png) | ![Favoritos](docs/screenshots/04-favoritos.png) |
 
+> Estas capturas son anteriores al módulo de apartados: todavía no hay capturas de la pestaña *Apartados* ni de la disponibilidad en el detalle.
+
 ## Estructura del repositorio
 
 ```
 .
 ├── Proyecto Bry y Yael/            Código de la app
-│   ├── Models/                     Book, BookStore, FavoriteBook, LoadState, DTOs de Open Library
-│   ├── Services/                   OpenLibraryService, FavoritesService, errores
-│   ├── ViewModels/                 BookListViewModel, BookDetailViewModel, FavoritesViewModel
-│   ├── Views/                      ContentView, SecondView, FavoritesView y Components/ (BookRow, SearchField, Theme)
+│   ├── Models/                     Book, BookStore, FavoriteBook, LoadState, DTOs de Open Library; apartados: ReservationStore, Reservation, InventoryItem, StockSummary, UserRole, ProfileStore
+│   ├── Services/                   OpenLibraryService, FavoritesService, errores; apartados: ReservationRepository (memoria y SwiftData)
+│   ├── ViewModels/                 BookListViewModel, BookDetailViewModel, FavoritesViewModel; apartados: BookStockViewModel, ReservationsViewModel, InventoryViewModel
+│   ├── Views/                      RootView (pestañas), ContentView, SecondView, FavoritesView, ReservationsView y Components/ (BookRow, SearchField, Theme, StockSection…)
 │   └── Proyecto_Bry_y_YaelApp.swift
 ├── Proyecto Bry y YaelTests/       Pruebas unitarias
 ├── Proyecto Bry y YaelUITests/     Plantilla de pruebas de interfaz (sin casos propios)
@@ -112,6 +116,7 @@ Open Library pide a las aplicaciones identificarse con un `User-Agent`; la app e
 | Documento | Contenido |
 |---|---|
 | [`docs/documentacion-tecnica.md`](docs/documentacion-tecnica.md) | Arquitectura, networking, persistencia, decisiones técnicas y limitaciones conocidas (versión final) |
+| [`docs/modulo-apartados.md`](docs/modulo-apartados.md) | Módulo de apartados: reglas, perfiles, estados del folio, supuestos, metas de la presentación y pruebas |
 | [`docs/entrega-final.md`](docs/entrega-final.md) | Revisión del repositorio, pruebas ejecutadas y versión de entrega |
 | [`docs/navigation-and-state.md`](docs/navigation-and-state.md) | Práctica 4: navegación y organización del estado (actualizado a la versión final) |
 | [`docs/mvvm-investigacion-arquitectura.md`](docs/mvvm-investigacion-arquitectura.md) | Práctica 5: investigación de MVVM y cómo se resolvieron sus dudas |
@@ -119,7 +124,7 @@ Open Library pide a las aplicaciones identificarse con un `User-Agent`; la app e
 
 ## Diseño inicial (wireframes)
 
-Los wireframes de [`docs/wireframes/`](docs/wireframes/) corresponden al **diseño inicial** del proyecto, con una barra de pestañas *Inicio / Buscar / Mis libros*. La versión final no tiene pestañas: la búsqueda está en la pantalla de Inicio y los favoritos se abren con el botón del corazón. Las capturas de arriba muestran la interfaz real.
+Los wireframes de [`docs/wireframes/`](docs/wireframes/) corresponden al **diseño inicial** del proyecto, con una barra de pestañas *Inicio / Buscar / Mis libros*. La versión final tiene dos pestañas distintas, *Libros* y *Apartados*: la búsqueda está en la pantalla de Inicio de *Libros* y los favoritos se abren con el botón del corazón. Las capturas de arriba muestran la pestaña *Libros* sin el módulo de apartados.
 
 ## Limitaciones conocidas
 
@@ -131,3 +136,4 @@ Resumen; la lista completa está en la [documentación técnica](docs/documentac
 - Open Library no tiene un campo de género, solo etiquetas; la app muestra la primera que esté en su lista de géneros conocidos y, si no hay ninguna, no muestra género.
 - La app fuerza el tema claro y solo tiene textos en español.
 - Las pruebas de interfaz (`UITests`) son la plantilla de Xcode; la lógica está cubierta con pruebas unitarias.
+- Apartados: el inventario y los folios viven en un solo dispositivo (sin sincronización), los perfiles no tienen contraseña y el plazo de vencimiento (3 días) es un supuesto por confirmar. Lista completa en [`docs/modulo-apartados.md`](docs/modulo-apartados.md#8-supuestos-y-limitaciones).
